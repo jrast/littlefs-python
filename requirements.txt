@@ -1,0 +1,4 @@
+Cython>=0.29.13
+tox>=3.14.0
+pytest>=4.0.0
+setuptools_scm>=3.3.3

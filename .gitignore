@@ -1,0 +1,14 @@
+build/
+dist/
+venv/
+.direnv/
+.vscode/
+.tox/
+.envrc
+
+*.so
+__pycache__
+*egg-info/
+
+src/**/*.c
+docs/_build

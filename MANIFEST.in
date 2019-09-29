@@ -1,0 +1,4 @@
+graft src
+graft littlefs
+include README.rst
+global-exclude src *.so __pycache__/*
