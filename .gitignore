@@ -7,8 +7,10 @@ venv/
 .envrc
 
 *.so
+*.pyd
 __pycache__
 *egg-info/
+.pytest_cache/
 
 src/**/*.c
 docs/_build
