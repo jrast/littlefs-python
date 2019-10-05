@@ -14,8 +14,9 @@ data = resp.json()
 print('Release Tag:', data['tag_name'])
 
 print('Assets:')
-for e in data['assets']:
-    print('Downloading', e['name'])
+num_assets = len(data['assets'])
+for nr, e in enumerate(data['assets'], 1):
+    print('(%2d/%2d) Downloading %s' % (nr, num_assets, e['name']))
     r = requests.get(e['browser_download_url'], allow_redirects=True)
     if r.status_code != 200:
         raise RuntimeError('Downloading %s failed!' % e['name'])
