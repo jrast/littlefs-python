@@ -21,7 +21,7 @@ cdef int _lfs_read(const lfs_config *c, lfs_block_t block, lfs_off_t off, void *
     data = ctx.user_context.read(ctx, block, off, size)
     memcpy(buffer, <char *>data, size)
     return 0
-    
+
 
 cdef int _lfs_prog(const lfs_config *c, lfs_block_t block, lfs_off_t off, const void * buffer, lfs_size_t size):
     ctx = <object>c.context
@@ -59,7 +59,7 @@ cdef class LFSConfig:
 
 
     def __init__(self, context=None, **kwargs):
-        # If the block size and count is not given, create a 
+        # If the block size and count is not given, create a
         # small memory with minimal block size and 8KB size
         block_size = kwargs.get('block_size', 128)
         block_count = kwargs.get('block_count', 64)
@@ -90,7 +90,7 @@ cdef class LFSConfig:
     @property
     def prog_size(self):
         return self._impl.prog_size
-    
+
     @property
     def block_size(self):
         return self._impl.block_size
@@ -98,7 +98,7 @@ cdef class LFSConfig:
     @property
     def block_count(self):
         return self._impl.block_count
-        
+
     @property
     def cache_size(self):
         return self._impl.cache_size
@@ -112,7 +112,7 @@ cdef class LFSFilesystem:
     cdef lfs_t _impl
 
 
-cdef class LFSFile: 
+cdef class LFSFile:
     cdef lfs_file_t _impl
 
 
@@ -144,14 +144,14 @@ def unmount(LFSFilesystem fs):
 
 def remove(LFSFilesystem fs, path):
     """Remove a file or directory
-    
+
     If removing a direcotry, the directory must be empty.
     """
     return _raise_on_error(lfs_remove(&fs._impl, path.encode(FILENAME_ENCODING)))
 
 def rename(LFSFilesystem fs, oldpath, newpath):
     """Rename or move a file or directory
-    
+
     If the destination exists, it must match the source in type.
     If the destination is a directory, the directory must be empty.
     """

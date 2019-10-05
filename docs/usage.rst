@@ -7,9 +7,9 @@ littlefs-python offers two interfaces to the underlying littlefs library:
 - A C-Style API which exposes all functions from the library using a minimal
   wrapper, written in Cython, to access the functions.
 - A pythonic high-level API which offers convenient functions similiar to
-  the ones known for normal files. The API is built on the C-Style layer
-  and methods can mostly be mixed and matched if required.
+  the ones known from the :mod:`os` standard library module.
 
+Both API's can be mixed and matched if required.
 
 C-Style API
 ===========
@@ -37,3 +37,7 @@ The :class:`~littlefs.lfs.LFSConfig` class exposes most of the internal fields f
 
 Pythonic API
 ============
+
+The pythonic API is a very early phase and not well documented.
+Please have a look at the example in the readme or the main page
+of the documentation for an example.
