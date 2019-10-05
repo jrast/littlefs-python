@@ -4,12 +4,13 @@ from Cython.Build import cythonize
 
 # Extension definition
 EXTENSIONS = [
-    Extension("_littlefs", ["src/littlefs/_littlefs.pyx", 'littlefs/lfs.c', 'littlefs/lfs_util.c'],
+    Extension("littlefs.lfs", ["src/littlefs/lfs.pyx", 'littlefs/lfs.c', 'littlefs/lfs_util.c'],
               include_dirs=['littlefs'],
               define_macros=[
                   ('LFS_NO_DEBUG', '1'),
                   ('LFS_NO_WARN', '1'),
                   ('LFS_NO_ERROR', '1'),
+                # ('LFS_YES_TRACE', '1')
               ],
               extra_compile_args=['-std=c99']
     )

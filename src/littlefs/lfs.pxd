@@ -15,13 +15,16 @@ from libc.string cimport memcpy
 cdef extern from "lfs.h":
 
     # Import #defined version information
-    cdef int LFS_VERSION
-    cdef int LFS_VERSION_MAJOR
-    cdef int LFS_VERSION_MINOR
+    cdef const int LFS_VERSION
+    cdef const int LFS_VERSION_MAJOR
+    cdef const int LFS_VERSION_MINOR
 
-    cdef int LFS_DISK_VERSION
-    cdef int LFS_DISK_VERSION_MAJOR
-    cdef int LFS_DISK_VERSION_MINOR
+    cdef const int LFS_DISK_VERSION
+    cdef const int LFS_DISK_VERSION_MAJOR
+    cdef const int LFS_DISK_VERSION_MINOR
+
+    cdef const int LFS_NAME_MAX
+
 
     # Basic type definitions
     ctypedef uint32_t lfs_size_t
@@ -57,10 +60,14 @@ cdef extern from "lfs.h":
     ctypedef lfs lfs_t
 
     cdef struct lfs_info:
-        pass
+        uint8_t type
+        lfs_size_t size
+        char name[LFS_NAME_MAX+1]
 
     cdef struct lfs_dir:
         pass    
+
+    ctypedef lfs_dir lfs_dir_t
 
     cdef struct lfs_file:
         pass
