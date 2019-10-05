@@ -1,3 +1,7 @@
+===================
+littlefs for Python
+===================
+
 .. image:: https://travis-ci.org/jrast/littlefs-python.svg?branch=master
     :target: https://travis-ci.org/jrast/littlefs-python
     :alt: Build Status: Linux
@@ -10,10 +14,6 @@
     :target: https://littlefs-python.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
-===================
-littlefs for Python
-===================
-
 littlefs-python provides a thin wrapper around littlefs_, a filesystem targeted for
 small embedded systems.
 The wrapper provides a pythonic interface to the filesystem and allows the creation,
@@ -24,7 +24,7 @@ and the littlefs library in one step.
 
 Quick Examples
 ==============
-Let's create a image ready to transfer to a flash memory:
+Let's create a image ready to transfer to a flash memory using the pythonic interface:
 
 .. code:: python
 
@@ -39,7 +39,30 @@ Let's create a image ready to transfer to a flash memory:
 
     # Dump the filesystem content to a file
     with open('FlashMemory.bin', 'wb') as fh:
-        fh.write(fs.buffer)
+        fh.write(fs.context.buffer)
+
+The same can be done by using the more verbose C-Style API, which closely resembels the
+steps which must be performed in C:
+
+.. code:: python
+
+    from littlefs import lfs
+
+    cfg = lfs.LFSConfig(block_size=512, block_count=256)
+    fs = lfs.LFSFilesystem()
+
+    # Format and mount the filesystem
+    lfs.format(fs, cfg)
+    lfs.mount(fs, cfg)
+
+    # Open a file and write some content
+    fh = lfs.file_open(fs, 'first-file.txt', 'w') as fh:
+    lfs.file_write(fs, fh, b'Some text to begin with\n')
+    lfs.file_close(fs, fh)
+
+    # Dump the filesystem content to a file
+    with open('FlashMemory.bin', 'wb') as fh:
+        fh.write(cfg.user_context.buffer)
 
 
 Installation
@@ -52,7 +75,8 @@ This is as simple as it can be::
 At the moment wheels (which require no build) are provided for the following platforms,
 on other platforms the source package is provided:
 
- - Linux
+ - Linux: Python 3.5, 3.6, 3.7 & 3.8 / 32- & 64-bit
+ - Windows: Python 3.5, 3.6 & 3.7 / 32- & 64-bit
 
 
 Development Setup
