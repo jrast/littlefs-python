@@ -1,13 +1,13 @@
 import pytest
 from littlefs import lfs
-from littlefs.errors import LittleFSException
+from littlefs.errors import LittleFSError
 
 
 def test_mount_unformatted(fs, cfg):
     """Mounting a unformated filesystem should lead to an error -84
     which means the filesystem is corrupted
     """
-    with pytest.raises(LittleFSException) as excinfo:
+    with pytest.raises(LittleFSError) as excinfo:
         lfs.mount(fs, cfg)
 
     assert excinfo.value.code == -84
@@ -42,8 +42,7 @@ def test_stat_file(mounted_fs):
     lfs.file_close(mounted_fs, fh)
 
     stat = lfs.stat(mounted_fs, 'test.txt')
-  
+
     assert stat.size == 10
     assert stat.type == 1
     assert stat.name == 'test.txt'
-    

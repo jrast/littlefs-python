@@ -6,6 +6,7 @@ venv/
 .tox/
 .envrc
 
+*.bin
 *.so
 *.pyd
 __pycache__

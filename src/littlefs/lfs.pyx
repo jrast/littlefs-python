@@ -41,7 +41,7 @@ cdef int _lfs_sync(const lfs_config *c):
 
 cdef int _raise_on_error(int code) except -1:
     if code < 0:
-        raise errors.LittleFSException(code)
+        raise errors.LittleFSError(code)
     return code
 
 

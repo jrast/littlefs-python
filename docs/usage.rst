@@ -38,6 +38,6 @@ The :class:`~littlefs.lfs.LFSConfig` class exposes most of the internal fields f
 Pythonic API
 ============
 
-The pythonic API is a very early phase and not well documented.
-Please have a look at the example in the readme or the main page
-of the documentation for an example.
+While the pythonic API is working for basic operations like reading and writing files,
+creating and listing directories and some other functionality, it's by no means finished.
+Currently the usage is best explained in the :ref:`doc-examples` section.
