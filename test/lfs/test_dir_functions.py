@@ -14,6 +14,7 @@ def test_mkdir(mounted_fs):
 
 def test_dir_open(testfs):
     dh = lfs.dir_open(testfs, 'testdir')
+    assert dh != None
 
 
 def test_dir_close(testfs):
@@ -33,12 +34,29 @@ def test_dir_read(testfs):
     assert info.name == 'testdir'
 
 
-def test_dir_rewind(testfs):
+def test_dir_read_overflow(testfs):
     dh = lfs.dir_open(testfs, '')
+
+    # There are three directories: ., .., testdir
+    for _ in range(3):
+        info = lfs.dir_read(testfs, dh)
+        assert info is not None
+
+    # If we read one more, we should get None
     info = lfs.dir_read(testfs, dh)
-    assert info.name == '.'
+    assert info is None
+
+
+def test_dir_rewind(testfs):
+    dirs = ['.', '..', 'testdir']
+    dh = lfs.dir_open(testfs, '')
+
+    for name in dirs:
+        info = lfs.dir_read(testfs, dh)
+        assert info.name == name
 
     lfs.dir_rewind(testfs, dh)
 
-    info = lfs.dir_read(testfs, dh)
-    assert info.name == '.'
+    for name in dirs:
+        info = lfs.dir_read(testfs, dh)
+        assert info.name == name
