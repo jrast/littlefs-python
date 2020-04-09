@@ -103,6 +103,16 @@ the package::
     It's highly recommended to install the package in a virtual environment!
 
 
+Creating a new release
+======================
+
+- Make sure the master branch is in the state you want it.
+- Create a tag with the new version number
+- Wait until all builds are completed. A new release should be created
+  automatically on github.
+- Download all assets (using `ci/download_release_files.py`)
+- Upload to pypi using twine: `twine upload dist/*`
+
 
 .. _littlefs: https://github.com/ARMmbed/littlefs
 .. _Cython: http://docs.cython.org/en/latest/index.html

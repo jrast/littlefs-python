@@ -4,6 +4,10 @@ import os
 HERE = os.path.dirname(__file__)
 DIST_DIR = os.path.abspath(os.path.join(HERE, '..', 'dist'))
 REPO = 'jrast/littlefs-python'
+
+if not os.path.exists(DIST_DIR):
+    os.mkdir(DIST_DIR)
+
 resp = requests.get('https://api.github.com/repos/%s/releases/latest' % REPO)
 
 if resp.status_code != 200:
