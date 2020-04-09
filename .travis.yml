@@ -1,15 +1,12 @@
-matrix:
+jobs:
   include:
-  - sudo: required
-    services:
+  - services:
     - docker
     env: DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64 PLAT=manylinux1_x86_64
-  - sudo: required
-    services:
+  - services:
     - docker
     env: DOCKER_IMAGE=quay.io/pypa/manylinux1_i686 PRE_CMD=linux32 PLAT=manylinux1_i686
-  - sudo: required
-    services:
+  - services:
     - docker
     env: DOCKER_IMAGE=quay.io/pypa/manylinux2010_x86_64 PLAT=manylinux2010_x86_64
 
@@ -23,7 +20,7 @@ script:
 
 deploy:
   provider: releases
-  api_key:
+  token:
     secure: "AJ9dJOpea2oQ0T5pl4nE2VjJ+/d8cNKD0Aj0mS4YbmJDYP0//W3d/tCfdvpf6XVGUEUs8LXEIkuMwnaOSKGRXizqtXbpaVwiV+LLq8xGPp/mHWcqzLA3mNHlFd982YB3yG000NHdm9TWDEwEj6MOejDzpRzHO11MHoV9dklgAO3lfiEb1wadw0DLYHwRqCMmnDbfVBSVP/o2SeYJuqnwTfvqdOPPBYlI6SXQs/lVNEa+TJqd94TWr0tclFoyKh6vNrD3lp/8a5iK+mmDa0HTXiArKf12gvqNE0We35MFArB0Af09lvZ51hifRWO1XLECw2x4lByLHjqUUYqvDpNQ/iGW5rIHhVxHlq31xh3uji6+IM7Et7fH6E0y3uZXdTQc8LQCmE/InjVRVSYFy2wArsAhoqu2kMOTuwLCSpM7qg7W8NYWO++FAPkFXlE++yDtqNyev9bKTXwsmLTraPOV+icekFue5xKapF3EEBB/6ssa5qqsc/TN/9uOabpGIBeKp0SpsakS7MMp3p8s0Ckx1EI3AY8BVZJ4xo6f1px6sMiRxy+CqvxKVnfHbCTca0pFm9j1JJZF0UOWTAEvuQGnCq1avmJ5nJV36s/gP09md05ASmKxiAgpqQaY1oztnsiPn7VjsgOCT8z+cpq7STvACDdaNJRDKB7GaGzeubrlUj8="
   file_glob: true
   file: wheels/*.whl
