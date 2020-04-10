@@ -103,6 +103,16 @@ the package::
     It's highly recommended to install the package in a virtual environment!
 
 
+Development Hints
+-----------------
+
+- Test should be run before commiting: `pytest test`
+- Mypy is used for typechecking. Run it also on the tests to catch more issues:
+  `mypy src test test/lfs`
+- Mypy stubs can be generated with `stubgen src`. This will create a `out` direcotry
+  containing the generated stub files.
+
+
 Creating a new release
 ======================
 
@@ -113,6 +123,7 @@ Creating a new release
 - Build the source distribution with `python setup.py sdist`
 - Download all assets (using `ci/download_release_files.py`)
 - Upload to pypi using twine: `twine upload dist/*`
+
 
 
 .. _littlefs: https://github.com/ARMmbed/littlefs

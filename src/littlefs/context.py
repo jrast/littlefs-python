@@ -1,12 +1,16 @@
 import logging
+import typing
+
+if typing.TYPE_CHECKING:
+    from .lfs import LFSConfig
 
 class UserContext:
     """Basic User Context Implementation"""
 
-    def __init__(self, buffsize):
+    def __init__(self, buffsize: int) -> None:
         self.buffer = bytearray([0xFF] * buffsize)
 
-    def read(self, cfg, block, off, size):
+    def read(self, cfg: 'LFSConfig', block: int, off: int, size: int) -> bytearray:
         """read data
 
         Parameters
@@ -25,7 +29,7 @@ class UserContext:
         end = start + size
         return self.buffer[start:end]
 
-    def prog(self, cfg, block, off, data):
+    def prog(self, cfg: 'LFSConfig', block: int, off: int, data: bytes) -> int:
         """program data
 
         Parameters
@@ -39,13 +43,13 @@ class UserContext:
         data : bytes
             Data to write
         """
-        logging.getLogger(__name__).debug('LFS Prog : Block: %d, Offset: %d, Data=%s' % (block, off, data))
+        logging.getLogger(__name__).debug('LFS Prog : Block: %d, Offset: %d, Data=%r' % (block, off, data))
         start = block * cfg.block_size + off
         end = start + len(data)
         self.buffer[start:end] = data
         return 0
 
-    def erase(self, cfg, block):
+    def erase(self, cfg: 'LFSConfig', block: int) -> int:
         """Erase a block
 
         Parameters
@@ -61,7 +65,7 @@ class UserContext:
         self.buffer[start:end] = [0xFF] * cfg.block_size
         return 0
 
-    def sync(self, cfg):
+    def sync(self, cfg: 'LFSConfig') -> int:
         """Sync cached data
 
         Parameters

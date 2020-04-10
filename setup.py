@@ -38,7 +38,9 @@ setup(
     use_scm_version=True,
     setup_requires=setup_requires,
     packages=find_packages('src'),
+    package_data={'*': ['py.typed', '*.pyi']},
     package_dir={'': 'src'},
+    zip_safe=False,
     ext_modules=cythonize(EXTENSIONS, language_level=3, annotate=False,
                           compiler_directives={'embedsignature': True}),
     classifiers=[

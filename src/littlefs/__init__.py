@@ -1,22 +1,26 @@
-from pkg_resources import get_distribution, DistributionNotFound
+from typing import TYPE_CHECKING, Optional, List
+
+from pkg_resources import DistributionNotFound, get_distribution
+
+from . import errors, lfs
+from .lfs import __LFS_DISK_VERSION__, __LFS_VERSION__
+
 try:
     __version__ = get_distribution('littlefs-python').version
 except DistributionNotFound:
     # Package not installed
     pass
 
-
-from .lfs import __LFS_DISK_VERSION__, __LFS_VERSION__
-from . import lfs
-from . import errors
-
+if TYPE_CHECKING:
+    from .context import UserContext
+    from .lfs import LFSStat
 
 class LittleFS:
     """Littlefs file system"""
 
-    def __init__(self, context=None, **kwargs):
+    def __init__(self, context:'UserContext'=None, **kwargs) -> None:
 
-        self.cfg = lfs.LFSConfig(**kwargs)
+        self.cfg = lfs.LFSConfig(context=context, **kwargs)
         self.fs = lfs.LFSFilesystem()
 
         if kwargs.get('mount', True):
@@ -27,23 +31,23 @@ class LittleFS:
                 self.mount()
 
     @property
-    def context(self):
+    def context(self) -> 'UserContext':
         return self.cfg.user_context
 
-    def format(self):
+    def format(self) -> int:
         """Format the underlying buffer"""
         return lfs.format(self.fs, self.cfg)
 
-    def mount(self):
+    def mount(self) -> int:
         """Mount the underlying buffer"""
         return lfs.mount(self.fs, self.cfg)
 
-    def open(self, fname, mode='r'):
+    def open(self, fname: str, mode='r') -> 'FileHandle':
         """Open a file"""
         fh = lfs.file_open(self.fs, fname, mode)
         return FileHandle(self.fs, fh)
 
-    def listdir(self, path='.'):
+    def listdir(self, path='.') -> List[str]:
         """List directory content"""
         dh = lfs.dir_open(self.fs, path)
         info = lfs.dir_read(self.fs, dh)
@@ -55,7 +59,7 @@ class LittleFS:
         lfs.dir_close(self.fs, dh)
         return lst
 
-    def mkdir(self, path):
+    def mkdir(self, path: str) -> int:
         """Create a new directory"""
         try:
             return lfs.mkdir(self.fs, path)
@@ -67,10 +71,10 @@ class LittleFS:
                 raise FileExistsError(msg) from e
             raise
 
-    def makedirs(self, name, exist_ok=False):
+    def makedirs(self, name: str, exist_ok=False):
         raise NotImplementedError
 
-    def remove(self, path):
+    def remove(self, path: str) -> int:
         """Remove a file or directory
 
         If the path to remove is a directory, the directory must be empty.
@@ -92,28 +96,25 @@ class LittleFS:
         """
         raise NotImplementedError
 
-    def rename(self, src, dst):
+    def rename(self, src: str, dst: str) -> int:
         return lfs.rename(self.fs, src, dst)
 
-    def replace(self, src, dst):
+    def replace(self, src: str, dst: str) -> int:
         raise NotImplementedError
 
-    def rmdir(self, path):
+    def rmdir(self, path: str) -> int:
         raise NotImplementedError
 
     def scandir(self, path):
         raise NotImplementedError
 
-    def stat(self, path):
+    def stat(self, path: str) -> 'LFSStat':
         return lfs.stat(self.fs, path)
-
-    def sync(self):
-        return lfs.sync(self.fs)
 
     def truncate(self, path, length):
         raise NotImplementedError
 
-    def unlink(self, path):
+    def unlink(self, path: str) -> int:
         """Remove a file or directory
 
         This function is an alias for :func:`remove`.
@@ -146,6 +147,3 @@ class FileHandle:
 
     def close(self):
         lfs.file_close(self.fs, self.fh)
-
-
-

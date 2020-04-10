@@ -19,21 +19,21 @@ ERROR_MAP = {
 
 class LittleFSError(Exception):
 
-    def __init__(self, code):
+    def __init__(self, code: int):
         super().__init__()
         self.code = code
 
     @property
-    def name(self):
+    def name(self) -> str:
         return ERROR_MAP.get(self.code, 'ERR_UNKNOWN')
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '<%s(%d)>' % (
             self.__class__.__name__,
             self.code
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return 'LittleFSError %d: %s' % (self.code, self.name)
 
 
