@@ -14,6 +14,9 @@ littlefs for Python
     :target: https://littlefs-python.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
+.. image:: https://badge.fury.io/py/littlefs-python.svg
+    :target: https://badge.fury.io/py/littlefs-python
+
 littlefs-python provides a thin wrapper around littlefs_, a filesystem targeted for
 small embedded systems.
 The wrapper provides a pythonic interface to the filesystem and allows the creation,
