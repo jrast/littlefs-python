@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional, List
+from typing import TYPE_CHECKING, List, Optional
 
 from pkg_resources import DistributionNotFound, get_distribution
 
@@ -72,7 +72,18 @@ class LittleFS:
             raise
 
     def makedirs(self, name: str, exist_ok=False):
-        raise NotImplementedError
+        """Recursive directory creation function."""
+        parts = [p for p in name.split('/') if p]
+        current_name = ''
+        for nr, part in enumerate(parts):
+            current_name += '/%s' % part
+            try:
+                self.mkdir(current_name)
+            except FileExistsError as e:
+                is_last = nr == len(parts) - 1
+                if (not is_last) or (is_last and exist_ok):
+                    continue
+                raise e
 
     def remove(self, path: str) -> int:
         """Remove a file or directory
