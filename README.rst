@@ -110,6 +110,7 @@ Creating a new release
 - Create a tag with the new version number
 - Wait until all builds are completed. A new release should be created
   automatically on github.
+- Build the source distribution with `python setup.py sdist`
 - Download all assets (using `ci/download_release_files.py`)
 - Upload to pypi using twine: `twine upload dist/*`
 
