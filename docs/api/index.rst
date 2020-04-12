@@ -14,7 +14,6 @@ littlefs module
 .. automodule:: littlefs
    :members:
    :undoc-members:
-   :show-inheritance:
 
 littlefs.context module
 =======================
@@ -22,12 +21,17 @@ littlefs.context module
 .. automodule:: littlefs.context
     :members:
     :undoc-members:
-    :show-inheritance:
 
 
 littlefs.lfs module
 ===================
 
+.. autoclass:: littlefs.lfs.LFSStat
+    :members:
+
 .. automodule:: littlefs.lfs
     :members:
     :undoc-members:
+
+
+

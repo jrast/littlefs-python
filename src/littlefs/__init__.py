@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Optional, Iterator
+from typing import TYPE_CHECKING, List, Tuple, Optional, Iterator
 
 from pkg_resources import DistributionNotFound, get_distribution
 
@@ -32,6 +32,7 @@ class LittleFS:
 
     @property
     def context(self) -> 'UserContext':
+        """User context of the file system"""
         return self.cfg.user_context
 
     def format(self) -> int:
@@ -48,7 +49,13 @@ class LittleFS:
         return FileHandle(self.fs, fh)
 
     def listdir(self, path='.') -> List[str]:
-        """List directory content"""
+        """List directory content
+        
+        List the content of a directory. This function uses :meth:`scandir`
+        internally. Using :meth:`scandir` might be better if you are
+        searching for a specific file or need access to the :class:`littlefs.lfs.LFSStat`
+        of the files.
+        """
         return [st.name for st in self.scandir(path)]
 
     def mkdir(self, path: str) -> int:
@@ -119,6 +126,7 @@ class LittleFS:
             parts.pop()
 
     def rename(self, src: str, dst: str) -> int:
+        """Rename a file or directory"""
         return lfs.rename(self.fs, src, dst)
 
     def rmdir(self, path: str) -> int:
@@ -139,6 +147,7 @@ class LittleFS:
         lfs.dir_close(self.fs, dh)
 
     def stat(self, path: str) -> 'LFSStat':
+        """Get the status of a file or directory"""
         return lfs.stat(self.fs, path)
 
     def unlink(self, path: str) -> int:
@@ -148,7 +157,20 @@ class LittleFS:
         """
         return self.remove(path)
 
-    def walk(self, top):
+    def walk(self, top: str) -> Iterator[Tuple[str, List[str], List[str]]]:
+        """Generate the file names in a directory tree
+
+        Generate the file and directory names in a directory tree by
+        walking the tree top-down. This functions closely resembels the 
+        behaviour of :func:`os.stat`.
+
+        Each iteration yields a tuple containing three elements:
+
+        - The root of the currently processed element
+        - A list of filenames located in the root
+        - A list of directorys located in the root
+
+        """
         files = []
         dirs = []
         from os import walk

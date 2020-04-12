@@ -8,7 +8,12 @@ from littlefs import errors
 
 
 FILENAME_ENCODING = 'ascii'
+"""Default filename encoding"""
+
 LFSStat = namedtuple('LFSStat', ['type', 'size', 'name'])
+LFSStat.__doc__ = """\
+Littlefs File / Directory status
+"""
 
 
 # Export LFS version and disk version to python
