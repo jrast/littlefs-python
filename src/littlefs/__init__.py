@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List, Optional, Iterator
 
 from pkg_resources import DistributionNotFound, get_distribution
 
@@ -49,15 +49,7 @@ class LittleFS:
 
     def listdir(self, path='.') -> List[str]:
         """List directory content"""
-        dh = lfs.dir_open(self.fs, path)
-        info = lfs.dir_read(self.fs, dh)
-        lst = []
-        while info:
-            if info.name not in ['.', '..']:
-                lst.append(info.name)
-            info = lfs.dir_read(self.fs, dh)
-        lfs.dir_close(self.fs, dh)
-        return lst
+        return [st.name for st in self.scandir(path)]
 
     def mkdir(self, path: str) -> int:
         """Create a new directory"""
@@ -95,7 +87,15 @@ class LittleFS:
         path : str
             The path to the file or directory to remove.
         """
-        return lfs.remove(self.fs, path)
+        try:
+            return lfs.remove(self.fs, path)
+        except errors.LittleFSError as e:
+            if e.code == -2:
+                msg = "[LittleFSError {:d}] No such file or directory: '{:s}'.".format(
+                    e.code, path
+                )
+                raise FileNotFoundError(msg) from e
+            raise e
 
     def removedirs(self, name):
         """Remove directories recursively
@@ -105,25 +105,41 @@ class LittleFS:
         function tries to recursively remove all parent directories
         which are also empty.
         """
-        raise NotImplementedError
+        parts = name.split('/')
+        while parts:
+            try:
+                name = '/'.join(parts)
+                if not name:
+                    break
+                self.remove('/'.join(parts))
+            except errors.LittleFSError as e:
+                if e.code == -39:
+                    break
+                raise e
+            parts.pop()
 
     def rename(self, src: str, dst: str) -> int:
         return lfs.rename(self.fs, src, dst)
 
-    def replace(self, src: str, dst: str) -> int:
-        raise NotImplementedError
-
     def rmdir(self, path: str) -> int:
-        raise NotImplementedError
+        """Remove a directory
 
-    def scandir(self, path):
-        raise NotImplementedError
+        This function is an alias for :func:`remove`
+        """
+        return self.remove(path)
+
+    def scandir(self, path='.') -> Iterator['LFSStat']:
+        """List directory content"""
+        dh = lfs.dir_open(self.fs, path)
+        info = lfs.dir_read(self.fs, dh)
+        while info:
+            if info.name not in ['.', '..']:
+                yield info
+            info = lfs.dir_read(self.fs, dh)
+        lfs.dir_close(self.fs, dh)
 
     def stat(self, path: str) -> 'LFSStat':
         return lfs.stat(self.fs, path)
-
-    def truncate(self, path, length):
-        raise NotImplementedError
 
     def unlink(self, path: str) -> int:
         """Remove a file or directory
@@ -133,8 +149,19 @@ class LittleFS:
         return self.remove(path)
 
     def walk(self, top):
-        raise NotImplementedError
-
+        files = []
+        dirs = []
+        from os import walk
+        for elem in self.scandir(top):
+            if elem.type == 1:
+                files.append(elem.name)
+            elif elem.type == 2:
+                dirs.append(elem.name)
+        
+        yield top, dirs, files
+        for dirname in dirs:
+            newtop = '/'.join((top, dirname)).replace('//', '/')
+            yield from self.walk(newtop)
 
 
 

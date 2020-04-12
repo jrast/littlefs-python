@@ -8,7 +8,7 @@ __LFS_DISK_VERSION__: Tuple[int, int] = ...
 LFSStat = NamedTuple('LFSStat', [
     ('type', int),
     ('size', int),
-    ('name', int)
+    ('name', str)
 ])
 
 class LFSConfig:
