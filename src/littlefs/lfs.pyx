@@ -187,9 +187,9 @@ def removeattr(LFSFilesystem fs, path, type):
 
 
 def file_open(LFSFilesystem fs, path, flags):
-    if flags == 'w':
+    if flags in ('w', 'wb'):
         flags = LFS_O_WRONLY | LFS_O_CREAT
-    elif flags == 'r':
+    elif flags in ('r', 'rb'):
         flags = LFS_O_RDONLY
     else:
         raise NotImplementedError
