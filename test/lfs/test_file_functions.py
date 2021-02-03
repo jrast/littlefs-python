@@ -5,6 +5,10 @@ def test_file_open(mounted_fs):
     fh = lfs.file_open(mounted_fs, 'test.txt', 'w')
 
 
+def test_file_open_wb(mounted_fs):
+    fh = lfs.file_open(mounted_fs, 'test.txt', 'wb')
+
+
 def test_file_close(mounted_fs):
     fh = lfs.file_open(mounted_fs, 'test.txt', 'w')
     lfs.file_close(mounted_fs, fh)
@@ -21,6 +25,16 @@ def test_file_read(mounted_fs):
     lfs.file_close(mounted_fs, fh)
 
     fh = lfs.file_open(mounted_fs, 'test.txt', 'r')
+    data = lfs.file_read(mounted_fs, fh, 10)
+    assert data == b'0123456789'
+
+
+def test_file_read_rb(mounted_fs):
+    fh = lfs.file_open(mounted_fs, 'test.txt', 'w')
+    lfs.file_write(mounted_fs, fh, b'0123456789')
+    lfs.file_close(mounted_fs, fh)
+
+    fh = lfs.file_open(mounted_fs, 'test.txt', 'rb')
     data = lfs.file_read(mounted_fs, fh, 10)
     assert data == b'0123456789'
 
