@@ -167,8 +167,8 @@ class LittleFS:
         Each iteration yields a tuple containing three elements:
 
         - The root of the currently processed element
-        - A list of filenames located in the root
         - A list of directorys located in the root
+        - A list of filenames located in the root
 
         """
         files = []
