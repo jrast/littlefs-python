@@ -10,9 +10,9 @@ def fs():
     fs.mkdir('/dir/emptyB')
     fs.mkdir('/dir/sub')
     with fs.open('/dir/sub/file.txt', 'w') as fh:
-        fh.write('Sample Text'.encode('ascii'))
+        fh.write('Sample Text')
     with fs.open('/dir/file.txt', 'w') as fh:
-        fh.write('Sample Text'.encode('ascii'))
+        fh.write('Sample Text')
     yield fs
 
 
@@ -44,5 +44,3 @@ def test_walk_size(fs):
         ('/dir/emptyB', 0),
         ('/dir/sub', 11),
     ]
-
-        
