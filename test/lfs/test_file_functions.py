@@ -1,4 +1,6 @@
+import pytest
 from littlefs import lfs
+from littlefs.errors import LittleFSError
 
 
 def test_file_open(mounted_fs):
@@ -7,6 +9,52 @@ def test_file_open(mounted_fs):
 
 def test_file_open_wb(mounted_fs):
     fh = lfs.file_open(mounted_fs, 'test.txt', 'wb')
+
+
+def test_file_open_a(mounted_fs):
+    fh = lfs.file_open(mounted_fs, 'test.txt', 'w')
+    lfs.file_write(mounted_fs, fh, b'0123456789')
+    lfs.file_close(mounted_fs, fh)
+
+    fh = lfs.file_open(mounted_fs, 'test.txt', 'a')
+    lfs.file_write(mounted_fs, fh, b'0123456789')
+    lfs.file_close(mounted_fs, fh)
+
+    info = lfs.stat(mounted_fs, 'test.txt')
+    assert info.size == 20
+
+
+def test_file_open_flags(mounted_fs):
+    flags = lfs.LFSFileFlag.wronly | lfs.LFSFileFlag.creat
+    fh = lfs.file_open(mounted_fs, 'test.txt', flags)
+
+
+def test_file_open_exist(mounted_fs):
+    fh = lfs.file_open(mounted_fs, 'test.txt', 'wb')
+    lfs.file_write(mounted_fs, fh, b'0123456789')
+    lfs.file_close(mounted_fs, fh)
+
+    with pytest.raises(LittleFSError) as excinfo:
+        fh = lfs.file_open(mounted_fs, 'test.txt', 'x')
+
+    assert excinfo.value.code == LittleFSError.Error.LFS_ERR_EXIST
+
+
+def test_file_open_noent(mounted_fs):
+    with pytest.raises(LittleFSError) as excinfo:
+        flags = lfs.LFSFileFlag.rdonly
+        fh = lfs.file_open(mounted_fs, 'test.txt', flags)
+
+    assert excinfo.value.code == LittleFSError.Error.LFS_ERR_NOENT
+
+
+def test_file_open_isdir(mounted_fs):
+    lfs.mkdir(mounted_fs, 'testdir')
+
+    with pytest.raises(LittleFSError) as excinfo:
+        fh = lfs.file_open(mounted_fs, 'testdir', "r")
+
+    assert excinfo.value.code == LittleFSError.Error.LFS_ERR_ISDIR
 
 
 def test_file_close(mounted_fs):
