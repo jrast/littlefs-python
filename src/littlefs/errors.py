@@ -1,23 +1,23 @@
+from enum import IntEnum
 
-
-ERROR_MAP = {
-    -5: 'ERR_IO',
-    -84: 'ERR_CORRUPT',
-    -2: 'ERR_NOENT',
-    -17: 'ERR_EXIST',
-    -20: 'ERR_NOTDIR',
-    -21: 'ERR_ISDIR',
-    -39: 'ERR_NOTEMPTY',
-    -9: 'ERR_BADF',
-    -27: 'ERR_FBIG',
-    -22: 'ERR_INVAL',
-    -28: 'ERR_NOSPC',
-    -12: 'ERR_NOMEM',
-    -61: 'ERR_NOATTR',
-    -36: 'ERR_NAMETOOLONG',
-}
 
 class LittleFSError(Exception):
+    class Error(IntEnum):
+        LFS_ERR_OK = 0  # No error
+        LFS_ERR_IO = -5  # Error during device operation
+        LFS_ERR_CORRUPT = -84  # Corrupted
+        LFS_ERR_NOENT = -2  # No directory entry
+        LFS_ERR_EXIST = -17  # Entry already exists
+        LFS_ERR_NOTDIR = -20  # Entry is not a dir
+        LFS_ERR_ISDIR = -21  # Entry is a dir
+        LFS_ERR_NOTEMPTY = -39  # Dir is not empty
+        LFS_ERR_BADF = -9  # Bad file number
+        LFS_ERR_FBIG = -27  # File too large
+        LFS_ERR_INVAL = -22  # Invalid parameter
+        LFS_ERR_NOSPC = -28  # No space left on device
+        LFS_ERR_NOMEM = -12  # No more memory available
+        LFS_ERR_NOATTR = -61  # No data/attr available
+        LFS_ERR_NAMETOOLONG = -36  # File name too long
 
     def __init__(self, code: int):
         super().__init__()
@@ -25,7 +25,10 @@ class LittleFSError(Exception):
 
     @property
     def name(self) -> str:
-        return ERROR_MAP.get(self.code, 'ERR_UNKNOWN')
+        try:
+            return self.Error(self.code).name
+        except ValueError:
+            return 'ERR_UNKNOWN'
 
     def __repr__(self) -> str:
         return '<%s(%d)>' % (
@@ -35,6 +38,3 @@ class LittleFSError(Exception):
 
     def __str__(self) -> str:
         return 'LittleFSError %d: %s' % (self.code, self.name)
-
-
-
