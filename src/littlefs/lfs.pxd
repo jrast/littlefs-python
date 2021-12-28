@@ -34,7 +34,7 @@ cdef extern from "lfs.h":
     ctypedef int32_t  lfs_soff_t
 
     ctypedef uint32_t lfs_block_t
- 
+
     # Enumerations
     cdef enum lfs_open_flags:
         LFS_O_RDONLY = 1         # Open a file as read only
@@ -43,7 +43,7 @@ cdef extern from "lfs.h":
         LFS_O_CREAT  = 0x0100    # Create a file if it does not exist
         LFS_O_EXCL   = 0x0200    # Fail if a file already exists
         LFS_O_TRUNC  = 0x0400    # Truncate the existing file to zero size
-        LFS_O_APPEND = 0x0800    # Move to end of file on every write 
+        LFS_O_APPEND = 0x0800    # Move to end of file on every write
 
         # internally used flags
         LFS_F_DIRTY   = 0x010000 # File does not match storage
@@ -65,12 +65,12 @@ cdef extern from "lfs.h":
         char name[LFS_NAME_MAX+1]
 
     cdef struct lfs_dir:
-        pass    
+        pass
 
     ctypedef lfs_dir lfs_dir_t
 
     cdef struct lfs_file:
-        pass
+        uint32_t flags
 
     ctypedef lfs_file lfs_file_t
 
