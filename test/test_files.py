@@ -74,14 +74,14 @@ def test_text_encoding(fs):
         data = f.read()
         assert data == bin_data
 
-    with fs.open('test2.txt', 'r') as f:
+    with fs.open('test2.txt', 'r', encoding='utf8') as f:
         data = f.read()
         assert data == txt_data
 
     offset = 30
     file_offset = len(txt_data[:offset].encode('utf8'))
 
-    with fs.open('test2.txt', 'r') as f:
+    with fs.open('test2.txt', 'r', encoding='utf8') as f:
         f.seek(file_offset)
         data = f.read(4)
         assert data == txt_data[offset:offset+4]
