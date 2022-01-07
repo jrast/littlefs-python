@@ -56,7 +56,30 @@ class LittleFS:
         errors: str = None,
         newline: str = None
     ) -> IO:
-        """Open a file"""
+        """Open a file.
+
+        :attr:`mode` is an optional string that specifies the mode in which
+        the file is opened and is analogous to the built-in :func:`io.open`
+        function. Files opened in text mode (default) will take and return
+        `str` objects. Files opened in binary mode will take and return
+        byte-like objects.
+
+        Parameters
+        ----------
+        fname : str
+            The path to the file to open.
+        mode : str
+            Specifies the mode in which the file is opened.
+        buffering : int
+            Specifies the buffering policy. Pass `0` to disable buffering in
+            binary mode.
+        encoding : str
+            Text encoding to use. (text mode only)
+        errors : str
+            Specifies how encoding and decoding errors are to be handled. (text mode only)
+        newline : str
+            Controls how universal newlines mode works. (text mode only)
+        """
 
         # Parse mode
         creating = False

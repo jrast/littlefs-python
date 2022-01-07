@@ -22,4 +22,4 @@ Indices and tables
 * :ref:`search`
 
 
-.. _littlefs: https://github.com/ARMmbed/littlefs
+.. _littlefs: https://github.com/littlefs-project/littlefs

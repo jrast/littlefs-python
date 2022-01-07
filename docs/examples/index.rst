@@ -29,7 +29,7 @@ we can see that the filesystem header was written:
 .. doctest::
 
     >>> fs.context.buffer[:20]
-    bytearray(b'\x01\x00\x00\x00\xf0\x0f\xff\xf7littlefs/\xe0\x00\x10')
+    bytearray(b'\x00\x00\x00\x00\xf0\x0f\xff\xf7littlefs/\xe0\x00\x10')
 
 We can start right away by creating some files. Lets create a simple file containing some
 Information about the hardware [2]_:
@@ -38,16 +38,15 @@ Information about the hardware [2]_:
     :options:
 
     >>> with fs.open('hardware.txt', 'w') as fh:
-    ...     fh.write(b'BoardVersion:1234\n')
-    ...     fh.write(b'BoardSerial:001122\n')
+    ...     fh.write('BoardVersion:1234\n')
+    ...     fh.write('BoardSerial:001122\n')
     18
     19
 
 
-Note that all files are opened in binary mode, therefore you must pass :class:`bytes` to
-the write function. File- and foldernames are encoded as ASCII.
-File handles of littlefs can be used as normal file handles, using a context manager
-ensures that the file is closed as soon as the :code:`with` block is left.
+File- and foldernames are encoded as ASCII. File handles of littlefs can be
+used as normal file handles, using a context manager ensures that the file is
+closed as soon as the :code:`with` block is left.
 
 Let's create some more files in a configuration folder:
 
@@ -56,10 +55,10 @@ Let's create some more files in a configuration folder:
 
     >>> fs.mkdir('/config')
     0
-    >>> with fs.open('config/sensor', 'w') as fh:
+    >>> with fs.open('config/sensor', 'wb') as fh:
     ...     fh.write(bytearray([0x01, 0x02, 0x05]))
     3
-    >>> with fs.open('config/actor', 'w') as fh:
+    >>> with fs.open('config/actor', 'wb') as fh:
     ...     fh.write(bytearray([0xAA, 0xBB] * 100))
     200
 
@@ -121,8 +120,8 @@ Ok, this seems to be fine. Let's check if the `actor` file was modified:
 
 .. doctest::
 
-    >>> with fs.open('/config/actor', 'r') as fh:
-    ...     data = fh.read(200)
+    >>> with fs.open('/config/actor', 'rb') as fh:
+    ...     data = fh.read()
     >>> assert data == bytearray([0xAA, 0xBB] * 100)
 
 Great, our memory contains the correct data!

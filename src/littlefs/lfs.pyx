@@ -18,6 +18,7 @@ Littlefs File / Directory status
 
 
 class LFSFileFlag(enum.IntFlag):
+    """Littlefs file mode flags"""
     rdonly = LFS_O_RDONLY
     wronly = LFS_O_WRONLY
     rdwr = LFS_O_RDWR
@@ -132,7 +133,8 @@ cdef class LFSFile:
     cdef lfs_file_t _impl
 
     @property
-    def flags(self):
+    def flags(self) -> LFSFileFlag:
+        """Mode flags of an open file"""
         return LFSFileFlag(self._impl.flags)
 
 
