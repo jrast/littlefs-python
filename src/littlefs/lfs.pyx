@@ -201,56 +201,50 @@ def removeattr(LFSFilesystem fs, path, type):
     raise NotImplementedError
 
 
-def _parse_mode(mode) -> LFSFileFlag:
-    creating = False
-    reading = False
-    writing = False
-    appending = False
-    updating = False
-
-    for ch in mode:
-        if ch == "x":
-            creating = True
-        elif ch == "r":
-            reading = True
-        elif ch == "w":
-            writing = True
-        elif ch == "a":
-            appending = True
-        elif ch == "+":
-            updating = True
-        elif ch in ("t", "b"):
-            # lfs_file_open() always opens files in binary mode. Text decoding
-            # is done at a higher level.
-            pass
-        else:
-            raise ValueError(f"invalid mode: '{mode}'")
-
-    exclusive_modes = (creating, reading, writing, appending)
-
-    if sum(int(m) for m in exclusive_modes) > 1:
-        raise ValueError(
-            "must have exactly one of create/read/write/append mode"
-        )
-
-    if creating:
-        flags = LFSFileFlag.creat | LFSFileFlag.excl | LFSFileFlag.wronly
-    elif reading:
-        flags = LFSFileFlag.rdonly
-    elif writing:
-        flags = LFSFileFlag.creat | LFSFileFlag.wronly | LFSFileFlag.trunc
-    elif appending:
-        flags = LFSFileFlag.wronly | LFSFileFlag.append
-
-    if updating:
-        flags |= LFSFileFlag.rdwr
-
-    return flags
-
-
 def file_open(LFSFilesystem fs, path, flags):
     if isinstance(flags, str):
-        flags = _parse_mode(flags)
+        creating = False
+        reading = False
+        writing = False
+        appending = False
+        updating = False
+
+        for ch in flags:
+            if ch == "x":
+                creating = True
+            elif ch == "r":
+                reading = True
+            elif ch == "w":
+                writing = True
+            elif ch == "a":
+                appending = True
+            elif ch == "+":
+                updating = True
+            elif ch in ("t", "b"):
+                # lfs_file_open() always opens files in binary mode.
+                # Text decoding is done at a higher level.
+                pass
+            else:
+                raise ValueError(f"invalid mode: '{flags}'")
+
+        exclusive_modes = (creating, reading, writing, appending)
+
+        if sum(int(m) for m in exclusive_modes) > 1:
+            raise ValueError(
+                "must have exactly one of create/read/write/append mode"
+            )
+
+        if creating:
+            flags = LFSFileFlag.creat | LFSFileFlag.excl | LFSFileFlag.wronly
+        elif reading:
+            flags = LFSFileFlag.rdonly
+        elif writing:
+            flags = LFSFileFlag.creat | LFSFileFlag.wronly | LFSFileFlag.trunc
+        elif appending:
+            flags = LFSFileFlag.wronly | LFSFileFlag.append
+
+        if updating:
+            flags |= LFSFileFlag.rdwr
 
     flags = int(flags)
     fh = LFSFile()
