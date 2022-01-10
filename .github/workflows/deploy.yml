@@ -1,4 +1,4 @@
-name: Build Distribution Files
+name: Build and Deploy Package
 
 on:
   push:
@@ -39,7 +39,9 @@ jobs:
           submodules: 'recursive'
 
       - name: Build sdist
-        run: python setup.py sdist
+        run:  |
+          pip install -r requirements.txt
+          python setup.py sdist
 
       - uses: actions/upload-artifact@v2
         with:
