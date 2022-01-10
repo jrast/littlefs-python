@@ -1,4 +1,5 @@
 import logging
+import enum
 from collections import namedtuple
 # Import all definitions
 # from littlefs._lfs cimport *
@@ -14,6 +15,17 @@ LFSStat = namedtuple('LFSStat', ['type', 'size', 'name'])
 LFSStat.__doc__ = """\
 Littlefs File / Directory status
 """
+
+
+class LFSFileFlag(enum.IntFlag):
+    """Littlefs file mode flags"""
+    rdonly = LFS_O_RDONLY
+    wronly = LFS_O_WRONLY
+    rdwr = LFS_O_RDWR
+    creat = LFS_O_CREAT
+    excl = LFS_O_EXCL
+    trunc = LFS_O_TRUNC
+    append = LFS_O_APPEND
 
 
 # Export LFS version and disk version to python
@@ -120,6 +132,11 @@ cdef class LFSFilesystem:
 cdef class LFSFile:
     cdef lfs_file_t _impl
 
+    @property
+    def flags(self) -> LFSFileFlag:
+        """Mode flags of an open file"""
+        return LFSFileFlag(self._impl.flags)
+
 
 cdef class LFSDirectory:
     cdef lfs_dir_t _impl
@@ -187,12 +204,51 @@ def removeattr(LFSFilesystem fs, path, type):
 
 
 def file_open(LFSFilesystem fs, path, flags):
-    if flags in ('w', 'wb'):
-        flags = LFS_O_WRONLY | LFS_O_CREAT
-    elif flags in ('r', 'rb'):
-        flags = LFS_O_RDONLY
-    else:
-        raise NotImplementedError
+    if isinstance(flags, str):
+        creating = False
+        reading = False
+        writing = False
+        appending = False
+        updating = False
+
+        for ch in flags:
+            if ch == "x":
+                creating = True
+            elif ch == "r":
+                reading = True
+            elif ch == "w":
+                writing = True
+            elif ch == "a":
+                appending = True
+            elif ch == "+":
+                updating = True
+            elif ch in ("t", "b"):
+                # lfs_file_open() always opens files in binary mode.
+                # Text decoding is done at a higher level.
+                pass
+            else:
+                raise ValueError(f"invalid mode: '{flags}'")
+
+        exclusive_modes = (creating, reading, writing, appending)
+
+        if sum(int(m) for m in exclusive_modes) > 1:
+            raise ValueError(
+                "must have exactly one of create/read/write/append mode"
+            )
+
+        if creating:
+            flags = LFSFileFlag.creat | LFSFileFlag.excl | LFSFileFlag.wronly
+        elif reading:
+            flags = LFSFileFlag.rdonly
+        elif writing:
+            flags = LFSFileFlag.creat | LFSFileFlag.wronly | LFSFileFlag.trunc
+        elif appending:
+            flags = LFSFileFlag.wronly | LFSFileFlag.append
+
+        if updating:
+            flags |= LFSFileFlag.rdwr
+
+    flags = int(flags)
     fh = LFSFile()
     _raise_on_error(lfs_file_open(&fs._impl, &fh._impl, path.encode(FILENAME_ENCODING), flags))
     return fh

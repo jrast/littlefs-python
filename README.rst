@@ -38,13 +38,13 @@ Let's create a image ready to transfer to a flash memory using the pythonic inte
 
     # Open a file and write some content
     with fs.open('first-file.txt', 'w') as fh:
-        fh.write(b'Some text to begin with\n')
+        fh.write('Some text to begin with\n')
 
     # Dump the filesystem content to a file
     with open('FlashMemory.bin', 'wb') as fh:
         fh.write(fs.context.buffer)
 
-The same can be done by using the more verbose C-Style API, which closely resembels the
+The same can be done by using the more verbose C-Style API, which closely resembles the
 steps which must be performed in C:
 
 .. code:: python
@@ -129,5 +129,5 @@ Creating a new release
 
 
 
-.. _littlefs: https://github.com/ARMmbed/littlefs
+.. _littlefs: https://github.com/littlefs-project/littlefs
 .. _Cython: http://docs.cython.org/en/latest/index.html
