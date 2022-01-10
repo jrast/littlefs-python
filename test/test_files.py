@@ -34,6 +34,20 @@ def test_open_exists(fs):
         with fs.open('test.txt', 'x') as f:
             pass
 
+def test_open_invalid_mode(fs):
+    with pytest.raises(ValueError) as excinfo:
+        with fs.open('test.txt', 'c') as fh:
+            pass
+    
+    assert str(excinfo.value) == "invalid mode: 'c'"
+
+def test_open_binary_and_text(fs):
+    with pytest.raises(ValueError) as excinfo:
+        with fs.open('test.txt', 'bt') as fh:
+            pass
+
+    assert str(excinfo.value) == "can't have text and binary mode at once"
+
 
 def test_bin_read(fs):
     with fs.open('test.txt', 'rb') as f:
