@@ -372,7 +372,7 @@ class FileHandle(io.RawIOBase):
         self._checkClosed()
 
         pos = self.tell()
-        ret = lfs.file_truncate(self.fs, pos)
+        ret = lfs.file_truncate(self.fs, self.fh, pos)
 
         return ret
 

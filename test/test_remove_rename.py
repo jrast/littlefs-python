@@ -61,3 +61,18 @@ def test_removedirs(fs):
     fs.removedirs('/dir/file.txt')
     assert fs.listdir('/') == [ ]
 
+
+def test_rename(fs: LittleFS):
+    # File rename
+    fs.rename('/dir/file.txt', '/dir/file_renamed.txt')
+    files_in_dir = fs.listdir('/dir')
+
+    assert 'file.txt' not in files_in_dir
+    assert 'file_renamed.txt' in files_in_dir
+
+    # Directory Rename
+    fs.rename('/dir/sub', '/dir/sub_renamed')
+    files_in_dir = fs.listdir('/dir')
+
+    assert 'sub' not in files_in_dir
+    assert 'sub_renamed' in files_in_dir

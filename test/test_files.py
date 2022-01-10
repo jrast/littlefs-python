@@ -219,3 +219,12 @@ def test_text_append_update(fs):
 
         data = f.read()
         assert data == contents
+
+def test_text_truncate(fs: LittleFS):
+    with fs.open('trunc.txt', 'w') as f:
+        f.write('Some Content')
+
+    with fs.open('trunc.txt', 'r+') as f:
+        f.truncate()
+
+    assert fs.open('trunc.txt', 'r').read() == ''
