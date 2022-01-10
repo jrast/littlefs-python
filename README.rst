@@ -2,14 +2,6 @@
 littlefs for Python
 ===================
 
-.. image:: https://travis-ci.org/jrast/littlefs-python.svg?branch=master
-    :target: https://travis-ci.org/jrast/littlefs-python
-    :alt: Build Status: Linux
-
-.. image:: https://ci.appveyor.com/api/projects/status/v7i08nhfbs2e0vro?svg=true
-    :target: https://ci.appveyor.com/project/jrast/littlefs-python
-    :alt: Build Status: Windows
-
 .. image:: https://readthedocs.org/projects/littlefs-python/badge/?version=latest
     :target: https://littlefs-python.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
