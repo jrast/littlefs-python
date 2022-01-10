@@ -76,10 +76,10 @@ This is as simple as it can be::
     pip install littlefs-python
 
 At the moment wheels (which require no build) are provided for the following platforms,
-on other platforms the source package is provided:
+on other platforms the source package is used and a compiler is required:
 
- - Linux: Python 3.5, 3.6, 3.7 & 3.8 / 32- & 64-bit
- - Windows: Python 3.5, 3.6 & 3.7 / 32- & 64-bit
+ - Linux: Python 3.6 - 3.10 / 32- & 64-bit
+ - Windows: Python 3.6 - 3.10 / 32- & 64-bit
 
 
 Development Setup
