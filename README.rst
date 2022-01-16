@@ -51,7 +51,7 @@ steps which must be performed in C:
     lfs.mount(fs, cfg)
 
     # Open a file and write some content
-    fh = lfs.file_open(fs, 'first-file.txt', 'w') as fh:
+    fh = lfs.file_open(fs, 'first-file.txt', 'w')
     lfs.file_write(fs, fh, b'Some text to begin with\n')
     lfs.file_close(fs, fh)
 
