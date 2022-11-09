@@ -41,6 +41,7 @@ fs = LittleFS(
 with open(img_filename, "rb") as f:
     data = f.read()
 fs.context.buffer = bytearray(data)
+fs.mount()
 
 for root, dirs, files in fs.walk("."):
     print(f"root {root} dirs {dirs} files {files}")
