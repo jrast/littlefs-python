@@ -18,6 +18,10 @@ parser.add_argument("--img-size", type=int, default=1 * 1024 * 1024)
 parser.add_argument("--block-size", type=int, default=4096)
 parser.add_argument("--read-size", type=int, default=256)
 parser.add_argument("--prog-size", type=int, default=256)
+# Note: 0 means to use the build-time default.
+parser.add_argument("--name-max", type=int, default=0)
+parser.add_argument("--file-max", type=int, default=0)
+parser.add_argument("--attr-max", type=int, default=0)
 args = parser.parse_args()
 
 img_filename = args.img_filename
@@ -25,6 +29,9 @@ img_size = args.img_size
 block_size = args.block_size
 read_size = args.read_size
 prog_size = args.prog_size
+name_max = args.name_max
+file_max = args.file_max
+attr_max = args.attr_max
 
 block_count = img_size / block_size
 if block_count * block_size != img_size:
@@ -36,6 +43,9 @@ fs = LittleFS(
     block_count=block_count,
     read_size=read_size,
     prog_size=prog_size,
+    name_max=name_max,
+    file_max=file_max,
+    attr_max=attr_max,
 )
 
 with open(img_filename, "rb") as f:

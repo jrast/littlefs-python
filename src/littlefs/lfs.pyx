@@ -93,6 +93,9 @@ cdef class LFSConfig:
         self._impl.cache_size = kwargs.get('cache_size', max(self._impl.read_size, self._impl.prog_size))
         # Lookahead buffer size in bytes
         self._impl.lookahead_size = kwargs.get('lookahead_size', 8)
+        self._impl.name_max = kwargs.get('name_max', 0)
+        self._impl.file_max = kwargs.get('file_max', 0)
+        self._impl.attr_max = kwargs.get('attr_max', 0)
 
         if context is None:
             context = UserContext(self._impl.block_size * self._impl.block_count)
@@ -123,6 +126,18 @@ cdef class LFSConfig:
     @property
     def lookahead_size(self):
         return self._impl.lookahead_size
+
+    @property
+    def name_max(self):
+        return self._impl.name_max
+
+    @property
+    def file_max(self):
+        return self._impl.file_max
+
+    @property
+    def attr_max(self):
+        return self._impl.attr_max
 
 
 cdef class LFSFilesystem:
