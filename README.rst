@@ -128,6 +128,15 @@ Development Hints
 Creating a new release
 ======================
 
+NEW (with github deploy action):
+
+- Make sure the master branch is in the state you want it.
+- Create a new tag with the correct version number and push the tag to github
+- Start the "Build and Deploy Pacakge" workflow for the created tag on github
+
+
+OUTDATED (without github deploy action):
+
 - Make sure the master branch is in the state you want it.
 - Create a tag with the new version number
 - Wait until all builds are completed. A new release should be created
