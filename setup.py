@@ -21,7 +21,6 @@ EXTENSIONS = [
 
 setup_requires = [
     'setuptools_scm>=3.3.3',
-    'Cython>=0.29.13',
 ]
 
 HERE = path.abspath(path.dirname(__file__))
