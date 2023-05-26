@@ -63,6 +63,19 @@ steps which must be performed in C:
 Installation
 ============
 
+.. note::
+    As littlefs_ is bundled with the package you will need to install the correct version of
+    this package in successfully read or create images for your embedded system. If you start
+    from scratch the latest version is recommeded.
+
+    .. csv-table::
+        :header: "Package Version", "LittleFS Version", "LittleFS File System Version"
+
+        0.6.0, 2.6.1, 2.1
+        0.5.0, 2.4.1, 2.0
+        0.4.0, 2.2.1, 2.0
+
+
 This is as simple as it can be::
 
     pip install littlefs-python
