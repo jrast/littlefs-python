@@ -47,6 +47,10 @@ class LittleFS:
         """Mount the underlying buffer"""
         return lfs.mount(self.fs, self.cfg)
 
+    def fs_mkconsistent(self) -> int:
+        """Attempt to make the filesystem consistent and ready for writing"""
+        return lfs.fs_mkconsistent(self.fs)
+
     def open(
         self,
         fname: str,
