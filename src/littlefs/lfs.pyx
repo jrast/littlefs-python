@@ -179,6 +179,11 @@ def unmount(LFSFilesystem fs):
     return _raise_on_error(lfs_unmount(&fs._impl))
 
 
+def fs_mkconsistent(LFSFilesystem fs):
+    """Attempt to make the filesystem consistent and ready for writing"""
+    return _raise_on_error(lfs_fs_mkconsistent(&fs._impl))
+
+
 def remove(LFSFilesystem fs, path):
     """Remove a file or directory
 

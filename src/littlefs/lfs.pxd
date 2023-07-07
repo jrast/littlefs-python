@@ -149,3 +149,4 @@ cdef extern from "lfs.h":
     int lfs_dir_rewind(lfs_t *lfs, lfs_dir *dir)
     lfs_ssize_t lfs_fs_size(lfs_t *lfs)
     int lfs_fs_traverse(lfs_t *lfs, int (*cb)(void*, lfs_block_t), void *data)
+    int lfs_fs_mkconsistent(lfs_t *lfs)
