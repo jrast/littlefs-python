@@ -1,6 +1,6 @@
 import io
 import warnings
-from typing import TYPE_CHECKING, List, Tuple, Iterator, IO
+from typing import TYPE_CHECKING, List, Tuple, Iterator, IO, Union
 
 from pkg_resources import DistributionNotFound, get_distribution
 
@@ -198,6 +198,18 @@ class LittleFS:
         )
 
         return wrapped
+
+    def getattr(self, path: str, typ: Union[str, bytes, int]) -> bytes:
+        typ = _typ_to_uint8(typ)
+        return lfs.getattr(self.fs, path, typ)
+
+    def setattr(self, path: str, typ: Union[str, bytes, int], data: bytes) -> None:
+        typ = _typ_to_uint8(typ)
+        lfs.setattr(self.fs, path, typ, data)
+
+    def removeattr(self, path: str, typ: Union[str, bytes, int]) -> None:
+        typ = _typ_to_uint8(typ)
+        lfs.removeattr(self.fs, path, typ)
 
     def listdir(self, path='.') -> List[str]:
         """List directory content
@@ -411,3 +423,14 @@ class FileHandle(io.RawIOBase):
     def flush(self):
         super().flush()
         lfs.file_sync(self.fs, self.fh)
+
+def _typ_to_uint8(typ):
+    try:
+        out = ord(typ)
+    except TypeError:
+        out = int(typ)
+
+    if not(0 <= out <= 255):
+        raise ValueError(f"type must be in range [0, 255]")
+
+    return out
