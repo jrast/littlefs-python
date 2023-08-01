@@ -199,6 +199,18 @@ class LittleFS:
 
         return wrapped
 
+    def getattr(self, path, typ) -> bytes:
+        typ = _typ_to_uint8(typ)
+        return lfs.getattr(self.fs, path, typ)
+
+    def setattr(self, path, typ) -> None:
+        typ = _typ_to_uint8(typ)
+        lfs.setattr(self.fs, path, typ)
+
+    def removeattr(self, path, typ) -> None:
+        typ = _typ_to_uint8(typ)
+        lfs.removeattr(self.fs, path, typ)
+
     def listdir(self, path='.') -> List[str]:
         """List directory content
 
@@ -411,3 +423,14 @@ class FileHandle(io.RawIOBase):
     def flush(self):
         super().flush()
         lfs.file_sync(self.fs, self.fh)
+
+def _typ_to_uint8(typ):
+    try:
+        out = ord(typ)
+    except TypeError:
+        out = int(typ)
+
+    if not(0 <= out <= 255):
+        raise ValueError(f"type must be in range [0, 255]")
+
+    return out

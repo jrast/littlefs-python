@@ -211,15 +211,18 @@ def stat(LFSFilesystem fs, path):
         free(info)
 
 
-def getattr(LFSFilesystem fs, path, type, buffer, size):
+def getattr(LFSFilesystem fs, path, typ):
+    buf = bytearray(LFS_ATTR_MAX)
+    cdef char[::1] buf_view = buf
+    attr_size = _raise_on_error(lfs_getattr(&fs._impl, path.encode(FILENAME_ENCODING), typ, &buf_view[0], LFS_ATTR_MAX))
+    return bytes(buf[:attr_size])
+
+
+def setattr(LFSFilesystem fs, path, typ):
     raise NotImplementedError
 
 
-def setattr(LFSFilesystem fs, path, type, buffer, size):
-    raise NotImplementedError
-
-
-def removeattr(LFSFilesystem fs, path, type):
+def removeattr(LFSFilesystem fs, path, typ):
     raise NotImplementedError
 
 
