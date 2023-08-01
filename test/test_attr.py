@@ -20,7 +20,7 @@ def test_attr(fs):
 
     fs.removeattr("/file.txt", "f")
     with pytest.raises(LittleFSError):
-        fs.getattr("/file.txt", "f"))
+        fs.getattr("/file.txt", "f")
 
     # Make sure "b" wasn't impacted
     assert(b"bar" == fs.getattr("/file.txt", "b"))
