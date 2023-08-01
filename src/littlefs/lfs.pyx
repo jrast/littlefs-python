@@ -213,17 +213,18 @@ def stat(LFSFilesystem fs, path):
 
 def getattr(LFSFilesystem fs, path, typ):
     buf = bytearray(LFS_ATTR_MAX)
-    cdef char[::1] buf_view = buf
+    cdef unsigned char[::1] buf_view = buf
     attr_size = _raise_on_error(lfs_getattr(&fs._impl, path.encode(FILENAME_ENCODING), typ, &buf_view[0], LFS_ATTR_MAX))
     return bytes(buf[:attr_size])
 
 
-def setattr(LFSFilesystem fs, path, typ):
-    raise NotImplementedError
+def setattr(LFSFilesystem fs, path, typ, data):
+    cdef const unsigned char[::1] buf_view = data
+    _raise_on_error(lfs_setattr(&fs._impl, path.encode(FILENAME_ENCODING), typ, &buf_view[0], len(data)))
 
 
 def removeattr(LFSFilesystem fs, path, typ):
-    raise NotImplementedError
+    _raise_on_error(lfs_removeattr(&fs._impl, path.encode(FILENAME_ENCODING), typ))
 
 
 def file_open(LFSFilesystem fs, path, flags):

@@ -203,9 +203,9 @@ class LittleFS:
         typ = _typ_to_uint8(typ)
         return lfs.getattr(self.fs, path, typ)
 
-    def setattr(self, path, typ) -> None:
+    def setattr(self, path, typ, data) -> None:
         typ = _typ_to_uint8(typ)
-        lfs.setattr(self.fs, path, typ)
+        lfs.setattr(self.fs, path, typ, data)
 
     def removeattr(self, path, typ) -> None:
         typ = _typ_to_uint8(typ)
