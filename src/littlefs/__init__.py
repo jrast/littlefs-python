@@ -301,6 +301,10 @@ class LittleFS:
         """Get the status of a file or directory"""
         return lfs.stat(self.fs, path)
 
+    def fs_stat(self) -> 'LFSFSStat':
+        """Get the status of the filesystem"""
+        return lfs.fs_stat(self.fs)
+
     def unlink(self, path: str) -> int:
         """Remove a file or directory
 
