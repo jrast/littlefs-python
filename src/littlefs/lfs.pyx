@@ -162,6 +162,16 @@ cdef class LFSDirectory:
     cdef lfs_dir_t _impl
 
 
+def fs_stat(LFSFilesystem fs):
+    """Get filesystem status"""
+    cdef lfs_fsinfo * info = <lfs_fsinfo *>malloc(sizeof(lfs_fsinfo))
+    try:
+        _raise_on_error(lfs_fs_stat(&fs._impl, info))
+        return LFSFSStat(info.disk_version, info.name_max, info.file_max, info.attr_max)
+    finally:
+        free(info)
+
+
 def fs_size(LFSFilesystem fs):
     return _raise_on_error(lfs_fs_size(&fs._impl))
 
@@ -212,15 +222,6 @@ def stat(LFSFilesystem fs, path):
     try:
         _raise_on_error(lfs_stat(&fs._impl, path.encode(FILENAME_ENCODING), info))
         return LFSStat(info.type, info.size, info.name.decode(FILENAME_ENCODING))
-    finally:
-        free(info)
-
-def fs_stat(LFSFilesystem fs):
-    """Get filesystem status"""
-    cdef lfs_fsinfo * info = <lfs_fsinfo *>malloc(sizeof(lfs_fsinfo))
-    try:
-        _raise_on_error(lfs_fs_stat(&fs._impl, info))
-        return LFSFSStat(info.disk_version, info.name_max, info.file_max, info.attr_max)
     finally:
         free(info)
 
