@@ -108,6 +108,8 @@ cdef extern from "lfs.h":
         lfs_size_t name_max
         lfs_size_t file_max
         lfs_size_t attr_max
+        lfs_size_t metadata_max
+        uint32_t disk_version
 
     int lfs_mount(lfs_t *lfs, const lfs_config *config)
     int lfs_format(lfs_t *lfs, const lfs_config *config)
