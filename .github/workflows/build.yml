@@ -54,7 +54,7 @@ jobs:
           CIBW_ARCHS_MACOS: "x86_64 arm64"
           CIBW_ARCHS_WINDOWS: "AMD64 x86"
           CIBW_BUILD: ${{ matrix.cibw_build }}
-          CIBW_SKIP: "*-musllinux_aarch64"  # Don't build musllinux wheels for aarch64
+          CIBW_SKIP: "pp* *-musllinux_aarch64"  # Don't build musllinux wheels for aarch64
           CIBW_TEST_REQUIRES: pytest
           CIBW_TEST_COMMAND: "pytest {project}/test"
           CIBW_TEST_SKIP: "*-macosx_arm64"  # Testing on Apple Silicon currently not supported.
