@@ -66,6 +66,12 @@ cdef extern from "lfs.h":
         lfs_size_t size
         char name[LFS_NAME_MAX+1]
 
+    cdef struct lfs_fsinfo:
+        uint32_t disk_version
+        lfs_size_t name_max
+        lfs_size_t file_max
+        lfs_size_t attr_max
+
     cdef struct lfs_dir:
         pass
 
@@ -149,6 +155,7 @@ cdef extern from "lfs.h":
     int lfs_dir_seek(lfs_t *lfs, lfs_dir *dir, lfs_off_t off)
     lfs_soff_t lfs_dir_tell(lfs_t *lfs, lfs_dir *dir)
     int lfs_dir_rewind(lfs_t *lfs, lfs_dir *dir)
+    int lfs_fs_stat(lfs_t *lfs, lfs_fsinfo* info)
     lfs_ssize_t lfs_fs_size(lfs_t *lfs)
     int lfs_fs_traverse(lfs_t *lfs, int (*cb)(void*, lfs_block_t), void *data)
     int lfs_fs_mkconsistent(lfs_t *lfs)

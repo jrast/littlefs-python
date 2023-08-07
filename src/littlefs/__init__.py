@@ -51,6 +51,10 @@ class LittleFS:
         """Attempt to make the filesystem consistent and ready for writing"""
         return lfs.fs_mkconsistent(self.fs)
 
+    def fs_stat(self) -> 'LFSFSStat':
+        """Get the status of the filesystem"""
+        return lfs.fs_stat(self.fs)
+
     def open(
         self,
         fname: str,

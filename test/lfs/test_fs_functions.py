@@ -46,3 +46,13 @@ def test_stat_file(mounted_fs):
     assert stat.size == 10
     assert stat.type == 1
     assert stat.name == 'test.txt'
+
+
+def test_fs_stat(mounted_fs):
+    """Test if fs stat works"""
+    stat = lfs.fs_stat(mounted_fs)
+    # The following values are defaults in littlefs.
+    assert stat.disk_version == 0x00020001
+    assert stat.name_max == 255
+    assert stat.file_max == 2147483647
+    assert stat.attr_max == 1022

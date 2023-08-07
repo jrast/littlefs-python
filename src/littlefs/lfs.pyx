@@ -16,6 +16,11 @@ LFSStat.__doc__ = """\
 Littlefs File / Directory status
 """
 
+LFSFSStat = namedtuple('LFSFSStat', ['disk_version', 'name_max', 'file_max', 'attr_max'])
+LFSFSStat.__doc__ = """\
+Littlefs filesystem status
+"""
+
 
 class LFSFileFlag(enum.IntFlag):
     """Littlefs file mode flags"""
@@ -155,6 +160,16 @@ cdef class LFSFile:
 
 cdef class LFSDirectory:
     cdef lfs_dir_t _impl
+
+
+def fs_stat(LFSFilesystem fs):
+    """Get filesystem status"""
+    cdef lfs_fsinfo * info = <lfs_fsinfo *>malloc(sizeof(lfs_fsinfo))
+    try:
+        _raise_on_error(lfs_fs_stat(&fs._impl, info))
+        return LFSFSStat(info.disk_version, info.name_max, info.file_max, info.attr_max)
+    finally:
+        free(info)
 
 
 def fs_size(LFSFilesystem fs):
