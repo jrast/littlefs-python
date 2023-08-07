@@ -1,6 +1,7 @@
 build/
 dist/
 venv/
+.venv/
 .direnv/
 .vscode/
 .tox/
