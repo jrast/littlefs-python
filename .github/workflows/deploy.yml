@@ -12,7 +12,7 @@ jobs:
 
     env:
       CIBW_BEFORE_BUILD: pip install -r requirements.txt
-      CIBW_SKIP: "pp* *-win_arm64"
+      CIBW_SKIP: "pp* *-win_arm64 *-musllinux_aarch64"
       CIBW_ARCHS_LINUX: "x86_64 i686 aarch64"
 
     steps:
