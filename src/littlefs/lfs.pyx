@@ -33,25 +33,25 @@ __LFS_VERSION__ = (LFS_VERSION_MAJOR, LFS_VERSION_MINOR)
 __LFS_DISK_VERSION__ = (LFS_DISK_VERSION_MAJOR, LFS_DISK_VERSION_MINOR)
 
 
-cdef int _lfs_read(const lfs_config *c, lfs_block_t block, lfs_off_t off, void * buffer, lfs_size_t size):
+cdef int _lfs_read(const lfs_config *c, lfs_block_t block, lfs_off_t off, void * buffer, lfs_size_t size) noexcept:
     ctx = <object>c.context
     data = ctx.user_context.read(ctx, block, off, size)
     memcpy(buffer, <char *>data, size)
     return 0
 
 
-cdef int _lfs_prog(const lfs_config *c, lfs_block_t block, lfs_off_t off, const void * buffer, lfs_size_t size):
+cdef int _lfs_prog(const lfs_config *c, lfs_block_t block, lfs_off_t off, const void * buffer, lfs_size_t size) noexcept:
     ctx = <object>c.context
     data = (<char*>buffer)[:size]
     return ctx.user_context.prog(ctx, block, off, data)
 
 
-cdef int _lfs_erase(const lfs_config *c, lfs_block_t block):
+cdef int _lfs_erase(const lfs_config *c, lfs_block_t block) noexcept:
     ctx = <object>c.context
     return ctx.user_context.erase(ctx, block)
 
 
-cdef int _lfs_sync(const lfs_config *c):
+cdef int _lfs_sync(const lfs_config *c) noexcept:
     ctx = <object>c.context
     return ctx.user_context.sync(ctx)
 
