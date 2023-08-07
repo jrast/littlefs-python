@@ -38,25 +38,25 @@ __LFS_VERSION__ = (LFS_VERSION_MAJOR, LFS_VERSION_MINOR)
 __LFS_DISK_VERSION__ = (LFS_DISK_VERSION_MAJOR, LFS_DISK_VERSION_MINOR)
 
 
-cdef int _lfs_read(const lfs_config *c, lfs_block_t block, lfs_off_t off, void * buffer, lfs_size_t size):
+cdef int _lfs_read(const lfs_config *c, lfs_block_t block, lfs_off_t off, void * buffer, lfs_size_t size) noexcept:
     ctx = <object>c.context
     data = ctx.user_context.read(ctx, block, off, size)
     memcpy(buffer, <char *>data, size)
     return 0
 
 
-cdef int _lfs_prog(const lfs_config *c, lfs_block_t block, lfs_off_t off, const void * buffer, lfs_size_t size):
+cdef int _lfs_prog(const lfs_config *c, lfs_block_t block, lfs_off_t off, const void * buffer, lfs_size_t size) noexcept:
     ctx = <object>c.context
     data = (<char*>buffer)[:size]
     return ctx.user_context.prog(ctx, block, off, data)
 
 
-cdef int _lfs_erase(const lfs_config *c, lfs_block_t block):
+cdef int _lfs_erase(const lfs_config *c, lfs_block_t block) noexcept:
     ctx = <object>c.context
     return ctx.user_context.erase(ctx, block)
 
 
-cdef int _lfs_sync(const lfs_config *c):
+cdef int _lfs_sync(const lfs_config *c) noexcept:
     ctx = <object>c.context
     return ctx.user_context.sync(ctx)
 
@@ -226,16 +226,20 @@ def stat(LFSFilesystem fs, path):
         free(info)
 
 
-def getattr(LFSFilesystem fs, path, type, buffer, size):
-    raise NotImplementedError
+def getattr(LFSFilesystem fs, path, typ):
+    buf = bytearray(LFS_ATTR_MAX)
+    cdef unsigned char[::1] buf_view = buf
+    attr_size = _raise_on_error(lfs_getattr(&fs._impl, path.encode(FILENAME_ENCODING), typ, &buf_view[0], LFS_ATTR_MAX))
+    return bytes(buf[:attr_size])
 
 
-def setattr(LFSFilesystem fs, path, type, buffer, size):
-    raise NotImplementedError
+def setattr(LFSFilesystem fs, path, typ, data):
+    cdef const unsigned char[::1] buf_view = data
+    _raise_on_error(lfs_setattr(&fs._impl, path.encode(FILENAME_ENCODING), typ, &buf_view[0], len(data)))
 
 
-def removeattr(LFSFilesystem fs, path, type):
-    raise NotImplementedError
+def removeattr(LFSFilesystem fs, path, typ):
+    _raise_on_error(lfs_removeattr(&fs._impl, path.encode(FILENAME_ENCODING), typ))
 
 
 def file_open(LFSFilesystem fs, path, flags):

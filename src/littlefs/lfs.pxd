@@ -25,6 +25,8 @@ cdef extern from "lfs.h":
 
     cdef const int LFS_NAME_MAX
 
+    cdef const int LFS_ATTR_MAX
+
 
     # Basic type definitions
     ctypedef uint32_t lfs_size_t
