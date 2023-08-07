@@ -20,6 +20,12 @@ jobs:
         with:
           submodules: "recursive"
 
+      - name: Setup QEMU  # Needed to build aarch64 wheels
+        if: runner.os == 'Linux'
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: all
+
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.12.3
 
