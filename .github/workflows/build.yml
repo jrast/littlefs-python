@@ -2,7 +2,7 @@ name: Build and Deploy Package (New)
 
 on:
   push:
-    branches:
+    branches: 
   release:
     types: [created]
   pull_request:
@@ -30,7 +30,6 @@ jobs:
     name: Build wheels on ${{ matrix.os }} CIBW_BUILD=${{ matrix.cibw_build }}
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         cibw_build: [cp38-*, cp39-*, cp310-*, cp311-*]
@@ -39,6 +38,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: "recursive"
+          fetch-depth: 0
 
       - name: Setup QEMU  # Needed to build aarch64 wheels
         if: runner.os == 'Linux'
@@ -53,10 +53,10 @@ jobs:
           CIBW_ARCHS_MACOS: "x86_64 arm64"
           CIBW_ARCHS_WINDOWS: "AMD64 x86"
           CIBW_BUILD: ${{ matrix.cibw_build }}
-          CIBW_SKIP: "*-musllinux_aarch64"
+          CIBW_SKIP: "*-musllinux_aarch64"  # Don't build musllinux wheels for aarch64
           CIBW_TEST_REQUIRES: pytest
           CIBW_TEST_COMMAND: "pytest {project}/test"
-          CIBW_TEST_SKIP: "*-macosx_arm64"
+          CIBW_TEST_SKIP: "*-macosx_arm64"  # Testing on Apple Silicon currently not supported.
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
