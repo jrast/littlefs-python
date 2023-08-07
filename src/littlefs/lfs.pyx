@@ -101,6 +101,8 @@ cdef class LFSConfig:
         self._impl.name_max = kwargs.get('name_max', 0)
         self._impl.file_max = kwargs.get('file_max', 0)
         self._impl.attr_max = kwargs.get('attr_max', 0)
+        self._impl.metadata_max = kwargs.get('metadata_max', 0)
+        self._impl.disk_version = kwargs.get('disk_version', 0)
 
         if context is None:
             context = UserContext(self._impl.block_size * self._impl.block_count)
@@ -143,6 +145,14 @@ cdef class LFSConfig:
     @property
     def attr_max(self):
         return self._impl.attr_max
+
+    @property
+    def metadata_max(self):
+        return self._impl.metadata_max
+
+    @property
+    def disk_version(self):
+        return self._impl.disk_version
 
 
 cdef class LFSFilesystem:

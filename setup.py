@@ -11,6 +11,7 @@ EXTENSIONS = [
                   ('LFS_NO_DEBUG', '1'),
                   ('LFS_NO_WARN', '1'),
                   ('LFS_NO_ERROR', '1'),
+                  ('LFS_MULTIVERSION', '1'),
                 # ('LFS_YES_TRACE', '1')
               ],
               extra_compile_args=['-std=c99']
