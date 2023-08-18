@@ -22,12 +22,12 @@ if TYPE_CHECKING:
 class LittleFS:
     """Littlefs file system"""
 
-    def __init__(self, context:'UserContext'=None, **kwargs) -> None:
+    def __init__(self, context:'UserContext'=None, mount=True, **kwargs) -> None:
 
         self.cfg = lfs.LFSConfig(context=context, **kwargs)
         self.fs = lfs.LFSFilesystem()
 
-        if kwargs.get('mount', True):
+        if mount:
             try:
                 self.mount()
             except errors.LittleFSError:
