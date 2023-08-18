@@ -80,29 +80,83 @@ cdef class LFSConfig:
         self._impl.sync = &_lfs_sync
 
 
-    def __init__(self, context=None, **kwargs):
-        # If the block size and count is not given, create a
-        # small memory with minimal block size and 8KB size
-        block_size = kwargs.get('block_size', 128)
-        block_count = kwargs.get('block_count', 64)
+    def __init__(self,
+                 context=None,
+                 *,
+                 block_size: int = 128,
+                 block_count: int = 64,
+                 read_size: int = 0,
+                 prog_size: int = 0,
+                 block_cycles: int = -1,
+                 cache_size: int = 0,
+                 lookahead_size: int = 8,
+                 name_max: int = 0,
+                 file_max: int = 0,
+                 attr_max: int = 0,
+                 metadata_max: int = 0,
+                 disk_version: int = 0,
+                ):
+        """LittleFS Configuration.
+
+        If the block size and count is not given, create a
+        small memory with minimal block size and 8KB size.
+
+        Parameters
+        ----------
+        block_size : int
+            Defaults to 128.
+        block_count : int
+            Number of blocks in the filesystem.
+            Defaults to 64.
+        read_size: int
+            Minimum size of a block read in bytes. All read operations will be a
+            multiple of this value.
+            Defaults to ``block_size``.
+        prog_size: int
+            Minimum size of a block program in bytes. All program operations will be
+            a multiple of this value.
+            Defaults to ``block_size``.
+        block_cycles: int
+            Number of erase cycles before littlefs evicts metadata logs and moves
+            the metadata to another block. Suggested values are in the
+            range 100-1000, with large values having better performance at the cost
+            of less consistent wear distribution.
+            Set to -1 to disable block-level wear-leveling.
+            Defaults to -1 (disable block-level wear-leveling).
+        cache_size:
+            Size of block caches in bytes. Each cache buffers a portion of a block in
+            RAM. The littlefs needs a read cache, a program cache, and one additional
+            Defaults to ``read_size`` or ``prog_size``, whichever is larger.
+        lookahead_size: int
+            Size of the lookahead buffer in bytes. A larger lookahead buffer
+            increases the number of blocks found during an allocation pass. The
+            lookahead buffer is stored as a compact bitmap, so each byte of RAM
+            can track 8 blocks. Must be a multiple of 8.
+            Defaults to 8.
+        name_max: int
+        file_max: int
+        attr_max: int
+        metadata_max: int
+        disk_version: int
+        """
 
         if block_size < 128:
             raise ValueError('Minimal block size is 128')
 
-        self._impl.read_size = kwargs.get('read_size', block_size)
-        self._impl.prog_size = kwargs.get('prog_size', block_size)
+        self._impl.read_size = read_size if read_size else block_size
+        self._impl.prog_size = prog_size if prog_size else block_size
         self._impl.block_size = block_size
         self._impl.block_count = block_count
-        self._impl.block_cycles = kwargs.get('block_cycles', -1)
+        self._impl.block_cycles = block_cycles
         # Cache size, at least as big as read / prog size
-        self._impl.cache_size = kwargs.get('cache_size', max(self._impl.read_size, self._impl.prog_size))
+        self._impl.cache_size = cache_size if cache_size else max(self._impl.read_size, self._impl.prog_size)
         # Lookahead buffer size in bytes
-        self._impl.lookahead_size = kwargs.get('lookahead_size', 8)
-        self._impl.name_max = kwargs.get('name_max', 0)
-        self._impl.file_max = kwargs.get('file_max', 0)
-        self._impl.attr_max = kwargs.get('attr_max', 0)
-        self._impl.metadata_max = kwargs.get('metadata_max', 0)
-        self._impl.disk_version = kwargs.get('disk_version', 0)
+        self._impl.lookahead_size = lookahead_size
+        self._impl.name_max = name_max
+        self._impl.file_max = file_max
+        self._impl.attr_max = attr_max
+        self._impl.metadata_max = metadata_max
+        self._impl.disk_version = disk_version
 
         if context is None:
             context = UserContext(self._impl.block_size * self._impl.block_count)

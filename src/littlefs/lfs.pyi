@@ -18,7 +18,22 @@ class LFSConfig:
 
     user_context: UserContext = ...
 
-    def __init__(self, context:UserContext=None, **kwargs) -> None: ...
+    def __init__(self,
+                 context=None,
+                 *,
+                 block_size: int = 128,
+                 block_count: int = 64,
+                 read_size: int = 0,
+                 prog_size: int = 0,
+                 block_cycles: int = -1,
+                 cache_size: int = 0,
+                 lookahead_size: int = 8,
+                 name_max: int = 0,
+                 file_max: int = 0,
+                 attr_max: int = 0,
+                 metadata_max: int = 0,
+                 disk_version: int = 0,
+                )-> None: ...
 
     @property
     def read_size(self) -> int: ...
