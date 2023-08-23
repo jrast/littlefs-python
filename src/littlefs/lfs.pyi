@@ -12,6 +12,16 @@ LFSStat = NamedTuple('LFSStat', [
     ('name', str)
 ])
 
+LFSFSStat = NamedTuple('LFSFSStat', [
+    'disk_version',
+    'name_max',
+    'file_max',
+    'attr_max',
+    'block_count',
+    'block_size',
+])
+
+
 class LFSFileFlag(enum.IntFlag): ...
 
 class LFSConfig:
