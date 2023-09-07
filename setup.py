@@ -44,6 +44,11 @@ setup(
     zip_safe=False,
     ext_modules=cythonize(EXTENSIONS, language_level=3, annotate=False,
                           compiler_directives={'embedsignature': True}),
+    entry_points={
+        'console_scripts': [
+            'python-littlefs = littlefs.__main__:main',
+        ]
+    },
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
