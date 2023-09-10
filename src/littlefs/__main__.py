@@ -4,12 +4,61 @@ import textwrap
 import pathlib
 from littlefs import LittleFS
 
+# Dictionary mapping suffixes to their size in bytes
+_suffix_map = {
+    "kb": 1024,
+    "mb": 1024**2,
+    "gb": 1024**3,
+}
 
-def create(args: argparse.Namespace):
+
+def size_parser(size_str):
+    """Parse filesystem / block size in different formats"""
+    size_str = str(size_str).lower()
+
+    # Check if the string starts with '0x', which indicates a hexadecimal number
+    if size_str.startswith("0x"):
+        base = 16
+        size_str = size_str[2:]
+    else:
+        base = 10
+
+    # Separate the size number and suffix
+    for suffix, multiplier in _suffix_map.items():
+        if size_str.endswith(suffix):
+            num_part = size_str[: -len(suffix)]
+            return int(num_part, base) * multiplier
+
+    # Handle base units; remove base suffix
+    if size_str.endswith("b"):
+        size_str = size_str[:-1]
+
+    # If no suffix, assume it's in bytes
+    return int(size_str, base)
+
+
+def validate_args(parser: argparse.ArgumentParser, args: argparse.Namespace):
+    if args.block_count is None:
+        block_count = args.fs_size // args.block_size
+        if block_count * args.block_size != args.fs_size:
+            parser.error("fs-size must be a multiple of block-size.")
+        args.block_count = block_count
+    else:
+        args.fs_size = args.block_size * args.block_count
+
+    args.image = args.image.absolute()
+
+    if args.verbose:
+        print("LittleFS Configuration:")
+        print(f"  Block Size:  {args.block_size:6d}  /  0x{args.block_size:X}")
+        print(f"  Image Size:  {args.fs_size:6d}  /  0x{args.fs_size:X}")
+        print(f"  Block Count: {args.block_count:6d}")
+        print(f"  Image:       {args.image}")
+
+
+def create(parser: argparse.ArgumentParser, args: argparse.Namespace):
     """Create LittleFS image from directory content"""
-    if args.block_size is None or args.block_count is None:
-        print("Block size and block count is required to create an image.")
-        return -1
+    validate_args(parser, args)
 
     source = pathlib.Path(args.source).absolute()
     fs = LittleFS(block_size=args.block_size, block_count=args.block_count)
@@ -27,11 +76,9 @@ def create(args: argparse.Namespace):
     return 0
 
 
-def _list(args: argparse.Namespace):
+def _list(parser: argparse.ArgumentParser, args: argparse.Namespace):
     """List LittleFS image content"""
-    if args.block_size is None or args.block_count is None:
-        print("Block size and block count is required to create an image.")
-        return -1
+    validate_args(parser, args)
 
     fs = LittleFS(block_size=args.block_size, block_count=args.block_count)
     fs.context.buffer = bytearray(args.image.read_bytes())
@@ -47,11 +94,9 @@ def _list(args: argparse.Namespace):
     return 0
 
 
-def unpack(args: argparse.Namespace):
+def unpack(parser: argparse.ArgumentParser, args: argparse.Namespace):
     """Unpack LittleFS image to directory"""
-    if args.block_size is None or args.block_count is None:
-        print("Block size and block count is required to create an image.")
-        return -1
+    validate_args(parser, args)
 
     fs = LittleFS(block_size=args.block_size, block_count=args.block_count)
     with open(args.image, "rb") as fp:
@@ -102,9 +147,15 @@ def main():
 
     common_parser = argparse.ArgumentParser(add_help=False)
     common_parser.add_argument("-v", "--verbose", action="count", default=0)
-    common_parser.add_argument("-s", "--block-size", type=int, help="LittleFS block size")
-    common_parser.add_argument("-c", "--block-count", type=int, help="LittleFS block count")
-    common_parser.add_argument("-i", "--image", help="LittleFS filesystem image", type=pathlib.Path)
+    common_parser.add_argument(
+        "--block-size", type=size_parser, required=True, help="LittleFS block size"
+    )
+    group = common_parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--block-count", type=int, help="LittleFS block count")
+    group.add_argument("--fs-size", type=size_parser, help="LittleFS filesystem size")
+    common_parser.add_argument(
+        "--image", type=pathlib.Path, required=True, help="LittleFS filesystem image"
+    )
 
     subparsers = parser.add_subparsers(required=True, title="available commands", dest="command")
 
@@ -124,7 +175,7 @@ def main():
     parser_list = add_command(_list, "list")
 
     args = parser.parse_args(sys.argv[1:])
-    return args.func(args)
+    return args.func(parser, args)
 
 
 if __name__ == "__main__":
