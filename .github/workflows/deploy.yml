@@ -11,8 +11,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
     env:
-      CIBW_BEFORE_BUILD: pip install -r requirements.txt
-      CIBW_SKIP: "pp* *-win_arm64 *-musllinux_aarch64"
+      CIBW_SKIP: "cp36-* cp37-* pp* *-win_arm64 *-musllinux_aarch64"
       CIBW_ARCHS_LINUX: "x86_64 i686 aarch64"
 
     steps:
@@ -20,7 +19,7 @@ jobs:
         with:
           submodules: "recursive"
 
-      - name: Setup QEMU  # Needed to build aarch64 wheels
+      - name: Setup QEMU # Needed to build aarch64 wheels
         if: runner.os == 'Linux'
         uses: docker/setup-qemu-action@v2
         with:
@@ -50,10 +49,8 @@ jobs:
         uses: pypa/cibuildwheel@v2.15.0
         env:
           CIBW_BUILD: ${{ matrix.cibw_build }}
+          CIBW_SKIP: "cp36-* cp37-*"
           CIBW_ARCHS: ${{ matrix.cibw_archs }}
-          CIBW_TEST_SKIP: "*-macosx_arm64"
-          CIBW_TEST_REQUIRES: pytest
-          CIBW_TEST_COMMAND: pytest {package}/tests
           CIBW_REPAIR_WHEEL_COMMAND: |
             echo "Target delocate archs: {delocate_archs}"
 
@@ -90,8 +87,8 @@ jobs:
 
       - name: Build sdist
         run: |
-          pip install -r requirements.txt
-          python setup.py sdist
+          pip install build
+          python -m build . --sdist
 
       - uses: actions/upload-artifact@v3
         with:

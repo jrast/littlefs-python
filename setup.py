@@ -21,10 +21,6 @@ EXTENSIONS = [
 ]
 
 
-setup_requires = [
-    "setuptools_scm>=3.3.3",
-]
-
 HERE = path.abspath(path.dirname(__file__))
 with open(path.join(HERE, "README.rst"), encoding="utf-8") as fh:
     long_description = fh.read()
@@ -38,7 +34,6 @@ setup(
     long_description=long_description,
     long_description_content_type="text/x-rst",
     use_scm_version=True,
-    setup_requires=setup_requires,
     packages=find_packages("src"),
     package_data={"*": ["py.typed", "*.pyi"]},
     package_dir={"": "src"},
