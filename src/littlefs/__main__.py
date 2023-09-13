@@ -129,7 +129,7 @@ def unpack(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
     return 0
 
 
-def main():
+def get_parser():
     if sys.argv[0].endswith("__main__.py"):
         prog = f"python -m littlefs"
     else:
@@ -159,7 +159,7 @@ def main():
         "--image", type=pathlib.Path, required=True, help="LittleFS filesystem image"
     )
 
-    subparsers = parser.add_subparsers(required=True, title="available commands", dest="command")
+    subparsers = parser.add_subparsers(required=True, title="Available Commands", dest="command")
 
     def add_command(handler, name="", help=""):
         subparser = subparsers.add_parser(
@@ -176,6 +176,11 @@ def main():
 
     parser_list = add_command(_list, "list")
 
+    return parser
+
+
+def main():
+    parser = get_parser()
     args = parser.parse_args(sys.argv[1:])
     return args.func(parser, args)
 

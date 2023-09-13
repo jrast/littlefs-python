@@ -10,6 +10,7 @@ Contents
 
    usage
    examples/index
+   cli
    api/index
 
 
