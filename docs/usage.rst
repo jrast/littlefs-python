@@ -2,12 +2,14 @@
 Usage
 =====
 
-littlefs-python offers two interfaces to the underlying littlefs library:
+littlefs-python offers three interfaces to the underlying littlefs library:
 
 - A C-Style API which exposes all functions from the library using a minimal
   wrapper, written in Cython, to access the functions.
 - A pythonic high-level API which offers convenient functions similiar to
   the ones known from the :mod:`os` standard library module.
+- A command line tool, available as ``littlefs-python``. See :ref:`doc-cli`
+  for more information.
 
 Both API's can be mixed and matched if required.
 
