@@ -56,7 +56,7 @@ def validate_args(parser: argparse.ArgumentParser, args: argparse.Namespace):
         print(f"  Image:       {args.image}")
 
 
-def create(parser: argparse.ArgumentParser, args: argparse.Namespace):
+def create(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
     """Create LittleFS image from directory content"""
     validate_args(parser, args)
 
@@ -76,7 +76,7 @@ def create(parser: argparse.ArgumentParser, args: argparse.Namespace):
     return 0
 
 
-def _list(parser: argparse.ArgumentParser, args: argparse.Namespace):
+def _list(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
     """List LittleFS image content"""
     validate_args(parser, args)
 
@@ -94,7 +94,7 @@ def _list(parser: argparse.ArgumentParser, args: argparse.Namespace):
     return 0
 
 
-def unpack(parser: argparse.ArgumentParser, args: argparse.Namespace):
+def unpack(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
     """Unpack LittleFS image to directory"""
     validate_args(parser, args)
 
@@ -106,7 +106,7 @@ def unpack(parser: argparse.ArgumentParser, args: argparse.Namespace):
     root_dest = root_dest.absolute()
     if not root_dest.exists() or not root_dest.is_dir():
         print("Destination directory does not exist")
-        return -1
+        return 1
 
     fs.mount()
     for root, dirs, files in fs.walk("/"):
@@ -125,6 +125,8 @@ def unpack(parser: argparse.ArgumentParser, args: argparse.Namespace):
             assert root_dest in dst_path.parents
             with fs.open(src_path, "rb") as src:
                 dst_path.write_bytes(src.read())
+
+    return 0
 
 
 def main():
