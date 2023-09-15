@@ -32,6 +32,7 @@ parser.add_argument("--prog-size", type=int, default=256)
 parser.add_argument("--name-max", type=int, default=0)
 parser.add_argument("--file-max", type=int, default=0)
 parser.add_argument("--attr-max", type=int, default=0)
+parser.add_argument("--disk-version", default=None)
 parser.add_argument("source")
 args = parser.parse_args()
 
@@ -50,6 +51,17 @@ if block_count * block_size != img_size:
     print("image size should be a multiple of block size")
     exit(1)
 
+if args.disk_version is None:
+    disk_version = 0  # 0 means the latest
+else:
+    # "2.1" -> 0x00020001
+    try:
+        major, minor = args.disk_version.split(".")
+        disk_version = int(major) * 0x10000 + int(minor)
+    except:
+        print(f"failed to parse disk version: {args.disk_version}")
+        exit(1)
+
 fs = LittleFS(
     block_size=block_size,
     block_count=block_count,
@@ -58,6 +70,7 @@ fs = LittleFS(
     name_max=name_max,
     file_max=file_max,
     attr_max=attr_max,
+    disk_version=disk_version,
 )
 
 # Note: path component separator etc are assumed to be compatible
