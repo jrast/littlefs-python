@@ -46,7 +46,7 @@ file_max = args.file_max
 attr_max = args.attr_max
 source_dir = args.source
 
-block_count = img_size / block_size
+block_count = img_size // block_size
 if block_count * block_size != img_size:
     print("image size should be a multiple of block size")
     exit(1)
