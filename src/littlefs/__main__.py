@@ -2,7 +2,7 @@ import argparse
 import sys
 import textwrap
 import pathlib
-from littlefs import LittleFS
+from littlefs import LittleFS, __version__
 
 # Dictionary mapping suffixes to their size in bytes
 _suffix_map = {
@@ -146,6 +146,7 @@ def get_parser():
         ),
         # formatter_class=argparse.RawTextHelpFormatter,
     )
+    parser.add_argument('--version', action='version', version=__version__)
 
     common_parser = argparse.ArgumentParser(add_help=False)
     common_parser.add_argument("-v", "--verbose", action="count", default=0)
@@ -181,6 +182,7 @@ def get_parser():
 
 def main():
     parser = get_parser()
+    parser.parse_known_args(sys.argv[1:])  # Allows for ``littlefs-python --version``
     args = parser.parse_args(sys.argv[1:])
     return args.func(parser, args)
 
