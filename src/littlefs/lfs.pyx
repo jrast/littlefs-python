@@ -90,7 +90,7 @@ cdef class LFSConfig:
                  block_cycles: int = -1,
                  cache_size: int = 0,
                  lookahead_size: int = 8,
-                 name_max: int = 0,
+                 name_max: int = 255,
                  file_max: int = 0,
                  attr_max: int = 0,
                  metadata_max: int = 0,
@@ -134,6 +134,7 @@ cdef class LFSConfig:
             can track 8 blocks. Must be a multiple of 8.
             Defaults to 8.
         name_max: int
+            Defaults to 255 (LittleFS default).
         file_max: int
         attr_max: int
         metadata_max: int
