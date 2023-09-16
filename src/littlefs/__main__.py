@@ -16,7 +16,7 @@ def _fs_from_args(args: argparse.Namespace) -> LittleFS:
     return LittleFS(
         block_size=args.block_size,
         block_count=args.block_count,
-        max_name_len=args.max_name_len,
+        name_max=args.name_max,
     )
 
 def size_parser(size_str):
@@ -162,7 +162,7 @@ def get_parser():
         "--block-size", type=size_parser, required=True, help="LittleFS block size"
     )
     common_parser.add_argument(
-        "--max-name-len", type=size_parser, default=255, help="LittleFS max file path length."
+        "--name-max", type=size_parser, default=255, help="LittleFS max file path length."
     )
     group = common_parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--block-count", type=int, help="LittleFS block count")
