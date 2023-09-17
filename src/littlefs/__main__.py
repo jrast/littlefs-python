@@ -57,11 +57,11 @@ def validate_args(parser: argparse.ArgumentParser, args: argparse.Namespace):
 
     if args.verbose:
         print("LittleFS Configuration:")
-        print(f"  Block Size:   {args.block_size:6d}  /  0x{args.block_size:X}")
-        print(f"  Image Size:   {args.fs_size:6d}  /  0x{args.fs_size:X}")
-        print(f"  Block Count:  {args.block_count:6d}")
-        print(f"  Max Name Len: {args.max_name_len:6d}")
-        print(f"  Image:        {args.image}")
+        print(f"  Block Size:  {args.block_size:6d}  /  0x{args.block_size:X}")
+        print(f"  Image Size:  {args.fs_size:6d}  /  0x{args.fs_size:X}")
+        print(f"  Block Count: {args.block_count:6d}")
+        print(f"  Name Max:    {args.name_max:6d}")
+        print(f"  Image:       {args.image}")
 
 
 def create(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
