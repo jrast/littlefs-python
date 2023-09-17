@@ -17,7 +17,7 @@ EXTENSIONS = [
             ("LFS_NAME_MAX", "32767"),
             # ('LFS_YES_TRACE', '1')
         ],
-        extra_compile_args=["-std=c99"],
+        extra_compile_args=["-std=c99", "-UNDEBUG"],
     )
 ]
 
