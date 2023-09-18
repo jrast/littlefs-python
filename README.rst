@@ -71,7 +71,8 @@ Installation
     .. csv-table::
         :header: "Package Version", "LittleFS Version", "LittleFS File System Version"
 
-        0.6.0, 2.7.0, 2.0 / 2.1 [#f1]_
+        0.7.X, 2.7.0, 2.0 / 2.1 [#f1]_
+        0.6.X, 2.7.0, 2.0 / 2.1 [#f1]_
         0.5.0, 2.6.1, 2.1
         0.4.0, 2.2.1, 2.0
         0.3.0, 2.2.1, 2.0
