@@ -28,7 +28,7 @@ class LFSConfig:
                  block_cycles: int = -1,
                  cache_size: int = 0,
                  lookahead_size: int = 8,
-                 name_max: int = 0,
+                 name_max: int = 255,
                  file_max: int = 0,
                  attr_max: int = 0,
                  metadata_max: int = 0,

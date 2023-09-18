@@ -2,7 +2,7 @@ import argparse
 import sys
 import textwrap
 import pathlib
-from littlefs import LittleFS
+from littlefs import LittleFS, __version__
 
 # Dictionary mapping suffixes to their size in bytes
 _suffix_map = {
@@ -11,6 +11,13 @@ _suffix_map = {
     "gb": 1024**3,
 }
 
+
+def _fs_from_args(args: argparse.Namespace) -> LittleFS:
+    return LittleFS(
+        block_size=args.block_size,
+        block_count=args.block_count,
+        name_max=args.name_max,
+    )
 
 def size_parser(size_str):
     """Parse filesystem / block size in different formats"""
@@ -50,9 +57,10 @@ def validate_args(parser: argparse.ArgumentParser, args: argparse.Namespace):
 
     if args.verbose:
         print("LittleFS Configuration:")
-        print(f"  Block Size:  {args.block_size:6d}  /  0x{args.block_size:X}")
-        print(f"  Image Size:  {args.fs_size:6d}  /  0x{args.fs_size:X}")
-        print(f"  Block Count: {args.block_count:6d}")
+        print(f"  Block Size:  {args.block_size:9d}  /  0x{args.block_size:X}")
+        print(f"  Image Size:  {args.fs_size:9d}  /  0x{args.fs_size:X}")
+        print(f"  Block Count: {args.block_count:9d}")
+        print(f"  Name Max:    {args.name_max:9d}")
         print(f"  Image:       {args.image}")
 
 
@@ -61,7 +69,7 @@ def create(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
     validate_args(parser, args)
 
     source = pathlib.Path(args.source).absolute()
-    fs = LittleFS(block_size=args.block_size, block_count=args.block_count)
+    fs = _fs_from_args(args)
     for path in source.rglob("*"):
         rel_path = path.relative_to(source)
         if path.is_dir():
@@ -80,7 +88,7 @@ def _list(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
     """List LittleFS image content"""
     validate_args(parser, args)
 
-    fs = LittleFS(block_size=args.block_size, block_count=args.block_count)
+    fs = _fs_from_args(args)
     fs.context.buffer = bytearray(args.image.read_bytes())
 
     fs.mount()
@@ -98,7 +106,7 @@ def unpack(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
     """Unpack LittleFS image to directory"""
     validate_args(parser, args)
 
-    fs = LittleFS(block_size=args.block_size, block_count=args.block_count)
+    fs = _fs_from_args(args)
     with open(args.image, "rb") as fp:
         fs.context.buffer = bytearray(fp.read())
 
@@ -146,11 +154,15 @@ def get_parser():
         ),
         # formatter_class=argparse.RawTextHelpFormatter,
     )
+    parser.add_argument('--version', action='version', version=__version__)
 
     common_parser = argparse.ArgumentParser(add_help=False)
     common_parser.add_argument("-v", "--verbose", action="count", default=0)
     common_parser.add_argument(
         "--block-size", type=size_parser, required=True, help="LittleFS block size"
+    )
+    common_parser.add_argument(
+        "--name-max", type=size_parser, default=255, help="LittleFS max file path length."
     )
     group = common_parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--block-count", type=int, help="LittleFS block count")
@@ -181,6 +193,7 @@ def get_parser():
 
 def main():
     parser = get_parser()
+    parser.parse_known_args(sys.argv[1:])  # Allows for ``littlefs-python --version``
     args = parser.parse_args(sys.argv[1:])
     return args.func(parser, args)
 

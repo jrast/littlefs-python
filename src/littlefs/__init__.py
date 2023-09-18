@@ -1,6 +1,6 @@
 import io
 import warnings
-from typing import TYPE_CHECKING, List, Tuple, Iterator, IO, Union
+from typing import TYPE_CHECKING, List, Tuple, Iterator, IO, Union, Optional
 
 from pkg_resources import DistributionNotFound, get_distribution
 
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 class LittleFS:
     """Littlefs file system"""
 
-    def __init__(self, context:'UserContext'=None, mount=True, **kwargs) -> None:
+    def __init__(self, context:Optional['UserContext']=None, mount=True, **kwargs) -> None:
 
         self.cfg = lfs.LFSConfig(context=context, **kwargs)
         self.fs = lfs.LFSFilesystem()

@@ -90,7 +90,7 @@ cdef class LFSConfig:
                  block_cycles: int = -1,
                  cache_size: int = 0,
                  lookahead_size: int = 8,
-                 name_max: int = 0,
+                 name_max: int = 255,
                  file_max: int = 0,
                  attr_max: int = 0,
                  metadata_max: int = 0,
@@ -134,6 +134,7 @@ cdef class LFSConfig:
             can track 8 blocks. Must be a multiple of 8.
             Defaults to 8.
         name_max: int
+            Defaults to 255 (LittleFS default).
         file_max: int
         attr_max: int
         metadata_max: int
@@ -163,6 +164,24 @@ cdef class LFSConfig:
 
         self.user_context = context
         self._impl.context = <void *>self
+
+    def __repr__(self):
+        args = (
+            f"context={self.user_context!r}",
+            f"block_size={self._impl.block_size}",
+            f"block_count={self._impl.block_count}",
+            f"read_size={self._impl.read_size}",
+            f"prog_size={self._impl.prog_size}",
+            f"block_cycles={self._impl.block_cycles}",
+            f"cache_size={self._impl.cache_size}",
+            f"lookahead_size={self._impl.lookahead_size}",
+            f"name_max={self._impl.name_max}",
+            f"file_max={self._impl.file_max}",
+            f"attr_max={self._impl.attr_max}",
+            f"metadata_max={self._impl.metadata_max}",
+            f"disk_version={self._impl.disk_version}"
+        )
+        return f"{self.__class__.__name__}({', '.join(args)})"
 
     @property
     def read_size(self):
