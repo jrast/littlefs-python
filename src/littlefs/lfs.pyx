@@ -114,6 +114,7 @@ cdef class LFSConfig:
             Defaults to 128.
         block_count : int
             Number of blocks in the filesystem.
+            If set to 0, attempt to autodetect ``block_count`` from filesystem.
             Defaults to 64.
         read_size: int
             Minimum size of a block read in bytes. All read operations will be a
