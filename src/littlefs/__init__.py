@@ -35,6 +35,10 @@ class LittleFS:
                 self.mount()
 
     @property
+    def block_count(self) -> int:
+        return self.fs.block_count
+
+    @property
     def context(self) -> 'UserContext':
         """User context of the file system"""
         return self.cfg.user_context
@@ -46,6 +50,10 @@ class LittleFS:
     def mount(self) -> int:
         """Mount the underlying buffer"""
         return lfs.mount(self.fs, self.cfg)
+
+    def unmount(self) -> int:
+        """Unmount the underlying buffer"""
+        return lfs.unmount(self.fs)
 
     def fs_mkconsistent(self) -> int:
         """Attempt to make the filesystem consistent and ready for writing"""

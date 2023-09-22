@@ -57,7 +57,7 @@ cdef extern from "lfs.h":
 
 
     cdef struct lfs:
-        pass
+        lfs_size_t block_count
 
     ctypedef lfs lfs_t
 

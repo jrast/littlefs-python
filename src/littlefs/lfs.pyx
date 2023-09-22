@@ -231,6 +231,10 @@ cdef class LFSConfig:
 cdef class LFSFilesystem:
     cdef lfs_t _impl
 
+    @property
+    def block_count(self) -> lfs_size_t:
+        return self._impl.block_count
+
 
 cdef class LFSFile:
     cdef lfs_file_t _impl
