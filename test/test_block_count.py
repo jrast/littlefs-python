@@ -24,8 +24,9 @@ def test_block_count_autodetect():
 
 
 def test_block_count_autodetect_format_fail():
-    with pytest.raises(LittleFSError):
+    with pytest.raises(LittleFSError) as e:
         fs = LittleFS(block_count=0)
+    assert e.value.code == LittleFSError.Error.LFS_ERR_INVAL
 
 
 def test_fs_stat_block_count_autodetect():
