@@ -62,6 +62,12 @@ class LittleFS:
         """Attempt to make the filesystem consistent and ready for writing"""
         return lfs.fs_mkconsistent(self.fs)
 
+    def fs_grow(self, block_count: int) -> int:
+        if block_count < self.block_count:
+            raise ValueError(f"Supplied {block_count=} cannot be smaller than current block_count {self.block_count}")
+
+        return lfs.fs_grow(self.fs, block_count)
+
     def fs_stat(self) -> 'LFSFSStat':
         """Get the status of the filesystem"""
         return lfs.fs_stat(self.fs)

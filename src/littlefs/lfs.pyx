@@ -300,6 +300,18 @@ def fs_mkconsistent(LFSFilesystem fs):
     return _raise_on_error(lfs_fs_mkconsistent(&fs._impl))
 
 
+def fs_grow(LFSFilesystem fs, block_count) -> int:
+    """Irreversibly grows the filesystem to a new size.
+
+    Parameters
+    ----------
+    fs: LFSFilesystem
+    block_count: int
+        Number of blocks in the new filesystem.
+    """
+    return _raise_on_error(lfs_fs_grow(&fs._impl, block_count))
+
+
 def remove(LFSFilesystem fs, path):
     """Remove a file or directory
 
