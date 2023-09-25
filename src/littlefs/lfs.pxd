@@ -57,7 +57,7 @@ cdef extern from "lfs.h":
 
 
     cdef struct lfs:
-        pass
+        lfs_size_t block_count
 
     ctypedef lfs lfs_t
 
@@ -71,6 +71,8 @@ cdef extern from "lfs.h":
         lfs_size_t name_max
         lfs_size_t file_max
         lfs_size_t attr_max
+        lfs_size_t block_count
+        lfs_size_t block_size
 
     cdef struct lfs_dir:
         pass
@@ -161,3 +163,4 @@ cdef extern from "lfs.h":
     lfs_ssize_t lfs_fs_size(lfs_t *lfs)
     int lfs_fs_traverse(lfs_t *lfs, int (*cb)(void*, lfs_block_t), void *data)
     int lfs_fs_mkconsistent(lfs_t *lfs)
+    int lfs_fs_grow(lfs_t *lfs, lfs_size_t block_count);

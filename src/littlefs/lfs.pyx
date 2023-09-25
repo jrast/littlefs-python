@@ -16,7 +16,14 @@ LFSStat.__doc__ = """\
 Littlefs File / Directory status
 """
 
-LFSFSStat = namedtuple('LFSFSStat', ['disk_version', 'name_max', 'file_max', 'attr_max'])
+LFSFSStat = namedtuple('LFSFSStat', [
+    'disk_version',
+    'name_max',
+    'file_max',
+    'attr_max',
+    'block_count',
+    'block_size',
+])
 LFSFSStat.__doc__ = """\
 Littlefs filesystem status
 """
@@ -107,6 +114,7 @@ cdef class LFSConfig:
             Defaults to 128.
         block_count : int
             Number of blocks in the filesystem.
+            If set to 0, attempt to autodetect ``block_count`` from filesystem.
             Defaults to 64.
         read_size: int
             Minimum size of a block read in bytes. All read operations will be a
@@ -231,6 +239,10 @@ cdef class LFSConfig:
 cdef class LFSFilesystem:
     cdef lfs_t _impl
 
+    @property
+    def block_count(self) -> lfs_size_t:
+        return self._impl.block_count
+
 
 cdef class LFSFile:
     cdef lfs_file_t _impl
@@ -250,7 +262,14 @@ def fs_stat(LFSFilesystem fs):
     cdef lfs_fsinfo * info = <lfs_fsinfo *>malloc(sizeof(lfs_fsinfo))
     try:
         _raise_on_error(lfs_fs_stat(&fs._impl, info))
-        return LFSFSStat(info.disk_version, info.name_max, info.file_max, info.attr_max)
+        return LFSFSStat(
+            info.disk_version,
+            info.name_max,
+            info.file_max,
+            info.attr_max,
+            info.block_count,
+            info.block_size,
+        )
     finally:
         free(info)
 
@@ -280,6 +299,18 @@ def unmount(LFSFilesystem fs):
 def fs_mkconsistent(LFSFilesystem fs):
     """Attempt to make the filesystem consistent and ready for writing"""
     return _raise_on_error(lfs_fs_mkconsistent(&fs._impl))
+
+
+def fs_grow(LFSFilesystem fs, block_count) -> int:
+    """Irreversibly grows the filesystem to a new size.
+
+    Parameters
+    ----------
+    fs: LFSFilesystem
+    block_count: int
+        Number of blocks in the new filesystem.
+    """
+    return _raise_on_error(lfs_fs_grow(&fs._impl, block_count))
 
 
 def remove(LFSFilesystem fs, path):

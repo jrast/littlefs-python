@@ -23,7 +23,6 @@ class LittleFS:
     """Littlefs file system"""
 
     def __init__(self, context:Optional['UserContext']=None, mount=True, **kwargs) -> None:
-
         self.cfg = lfs.LFSConfig(context=context, **kwargs)
         self.fs = lfs.LFSFilesystem()
 
@@ -35,21 +34,39 @@ class LittleFS:
                 self.mount()
 
     @property
+    def block_count(self) -> int:
+        return self.fs.block_count
+
+    @property
     def context(self) -> 'UserContext':
         """User context of the file system"""
         return self.cfg.user_context
 
     def format(self) -> int:
         """Format the underlying buffer"""
+        if self.cfg.block_count == 0:
+            # ``lfs.format`` looks at cfg's block_count.
+            # Cannot autodetect size when formatting.
+            raise LittleFSError(LittleFSError.Error.LFS_ERR_INVAL)
         return lfs.format(self.fs, self.cfg)
 
     def mount(self) -> int:
         """Mount the underlying buffer"""
         return lfs.mount(self.fs, self.cfg)
 
+    def unmount(self) -> int:
+        """Unmount the underlying buffer"""
+        return lfs.unmount(self.fs)
+
     def fs_mkconsistent(self) -> int:
         """Attempt to make the filesystem consistent and ready for writing"""
         return lfs.fs_mkconsistent(self.fs)
+
+    def fs_grow(self, block_count: int) -> int:
+        if block_count < self.block_count:
+            raise ValueError(f"Supplied {block_count=} cannot be smaller than current block_count {self.block_count}")
+
+        return lfs.fs_grow(self.fs, block_count)
 
     def fs_stat(self) -> 'LFSFSStat':
         """Get the status of the filesystem"""
