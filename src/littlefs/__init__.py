@@ -275,7 +275,7 @@ class LittleFS:
         """Remove directories recursively
 
         This works like :func:`remove` but if the leaf directory
-        is empty after the successfull removal of :attr:`name`, the
+        is empty after the successful removal of :attr:`name`, the
         function tries to recursively remove all parent directories
         which are also empty.
         """
@@ -334,7 +334,7 @@ class LittleFS:
         Each iteration yields a tuple containing three elements:
 
         - The root of the currently processed element
-        - A list of directorys located in the root
+        - A list of directories located in the root
         - A list of filenames located in the root
 
         """
