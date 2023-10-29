@@ -66,7 +66,7 @@ Installation
 .. note::
     As littlefs_ is bundled with the package you will need to install the correct version of
     this package in successfully read or create images for your embedded system. If you start
-    from scratch the latest version is recommeded.
+    from scratch the latest version is recommended.
 
     .. csv-table::
         :header: "Package Version", "LittleFS Version", "LittleFS File System Version"
@@ -119,10 +119,10 @@ the package::
 Development Hints
 -----------------
 
-- Test should be run before commiting: `pytest test`
+- Test should be run before committing: `pytest test`
 - Mypy is used for typechecking. Run it also on the tests to catch more issues:
   `mypy src test test/lfs`
-- Mypy stubs can be generated with `stubgen src`. This will create a `out` direcotry
+- Mypy stubs can be generated with `stubgen src`. This will create a `out` directory
   containing the generated stub files.
 
 
@@ -133,7 +133,7 @@ NEW (with github deploy action):
 
 - Make sure the master branch is in the state you want it.
 - Create a new tag with the correct version number and push the tag to github
-- Start the "Build and Deploy Pacakge" workflow for the created tag on github
+- Start the "Build and Deploy Package" workflow for the created tag on github
 
 
 OUTDATED (without github deploy action):
