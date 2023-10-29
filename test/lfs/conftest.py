@@ -15,12 +15,12 @@ def cfg():
 
 @pytest.fixture(scope='function')
 def formated_fs(fs, cfg):
-    """fixutre for a formated filesystem"""
+    """fixutre for a formatted filesystem"""
     lfs.format(fs, cfg)
     yield fs
 
 @pytest.fixture(scope='function')
 def mounted_fs(formated_fs, cfg):
-    """fixture for a formated and mounted filesystem"""
+    """fixture for a formatted and mounted filesystem"""
     lfs.mount(formated_fs, cfg)
     yield formated_fs

@@ -11,7 +11,7 @@ def fs():
 
 
 def test_attr(fs):
-    # Test if 2 attributes can be set without impacting eachother.
+    # Test if 2 attributes can be set without impacting each other.
     fs.setattr("/file.txt", "f", b"foo")
     fs.setattr("/file.txt", "b", b"bar")
 
