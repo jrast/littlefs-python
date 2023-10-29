@@ -14,7 +14,7 @@ EXTENSIONS = [
             ("LFS_NO_WARN", "1"),
             ("LFS_NO_ERROR", "1"),
             ("LFS_MULTIVERSION", "1"),
-            ("LFS_NAME_MAX", "32767"),
+            ("LFS_NAME_MAX", "1022"),  # LittleFS limitation: must be <= 1022
             # ('LFS_YES_TRACE', '1')
         ],
         extra_compile_args=["-std=c99", "-UNDEBUG"],
@@ -39,9 +39,7 @@ setup(
     package_data={"*": ["py.typed", "*.pyi"]},
     package_dir={"": "src"},
     zip_safe=False,
-    ext_modules=cythonize(
-        EXTENSIONS, language_level=3, annotate=False, compiler_directives={"embedsignature": True}
-    ),
+    ext_modules=cythonize(EXTENSIONS, language_level=3, annotate=False, compiler_directives={"embedsignature": True}),
     entry_points={
         "console_scripts": [
             "littlefs-python = littlefs.__main__:main",
