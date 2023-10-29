@@ -329,18 +329,15 @@ class LittleFS:
 
         Generate the file and directory names in a directory tree by
         walking the tree top-down. This functions closely resembels the
-        behaviour of :func:`os.stat`.
+        behaviour of :func:`os.walk`.
 
         Each iteration yields a tuple containing three elements:
 
         - The root of the currently processed element
         - A list of directories located in the root
         - A list of filenames located in the root
-
         """
-        files = []
-        dirs = []
-        from os import walk
+        files, dirs = [], []
         for elem in self.scandir(top):
             if elem.type == 1:
                 files.append(elem.name)
