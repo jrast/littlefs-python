@@ -251,7 +251,7 @@ class LittleFS:
                     continue
                 raise e
 
-    def remove(self, path: str) -> int:
+    def remove(self, path: str, recursive: bool = False) -> None:
         """Remove a file or directory
 
         If the path to remove is a directory, the directory must be empty.
@@ -260,16 +260,27 @@ class LittleFS:
         ----------
         path : str
             The path to the file or directory to remove.
+        recursive: bool
+            If ``true`` and ``path`` is a directory, recursively remove all children files/folders.
         """
         try:
-            return lfs.remove(self.fs, path)
+            lfs.remove(self.fs, path)
+            return
         except errors.LittleFSError as e:
-            if e.code == -2:
-                msg = "[LittleFSError {:d}] No such file or directory: '{:s}'.".format(
-                    e.code, path
-                )
+            if e.code == LittleFSError.Error.LFS_ERR_NOENT:
+                msg = "[LittleFSError {:d}] No such file or directory: '{:s}'.".format(e.code, path)
                 raise FileNotFoundError(msg) from e
-            raise e
+            elif e.code == LittleFSError.Error.LFS_ERR_NOTEMPTY and recursive:
+                # We want to recursively delete the ``path`` directory.
+                # Handled below to reduce amount of logic in ``except`` handler.
+                pass
+            else:
+                raise e
+
+        # Recursively delete the ``path`` directory
+        for elem in self.scandir(path):
+            self.remove(path + "/" + elem.name, recursive=True)
+        lfs.remove(self.fs, path)
 
     def removedirs(self, name):
         """Remove directories recursively

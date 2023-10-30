@@ -52,6 +52,13 @@ def test_remove(fs):
     assert '/dir/directroy/' in str(excinfo.value)
 
 
+def test_remove_recursive(fs):
+    fs.remove("/dir", recursive=True)
+    with pytest.raises(errors.LittleFSError) as excinfo:
+        fs.stat("/dir")
+    assert "LittleFSError -2" in str(excinfo.value)
+
+
 def test_removedirs(fs):
     fs.removedirs('/dir/sub/file.txt')
     assert set(fs.listdir('/dir')) == {'emptyA', 'emptyB', 'file.txt'}
