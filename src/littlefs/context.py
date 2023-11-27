@@ -144,6 +144,9 @@ try:
             win32file.FlushFileBuffers(self.device)
             return 0
         
+        def __del__(self):
+            win32file.CloseHandle(self.device)
+        
 except ImportError:
      class UserContextWinDisk:
         def __init__(self, disk_path: str) -> None:
