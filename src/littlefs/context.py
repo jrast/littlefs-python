@@ -82,10 +82,13 @@ class UserContext:
 try:  
     import win32file  
 except ImportError:
-    raise ImportError("Unable to import 'win32file'. This module is required for Windows-specific functionality. Please ensure you are running on a Windows platform or install 'pywin32' using: 'pip install pywin32'.")
+    win32file = None
 else:
     class UserContextWinDisk(UserContext):
         def __init__(self, disk_path:str) -> None:
+            # if the user does not 
+            if win32file == None:
+                raise ImportError("Unable to import 'win32file'. This module is required for Windows-specific functionality. Please ensure you are running on a Windows platform or install 'pywin32' using: 'pip install pywin32'.")
             self.device = win32file.CreateFile(disk_path, win32file.GENERIC_READ, win32file.FILE_SHARE_READ, None, win32file.OPEN_EXISTING, 0, None)
             if self.device == win32file.INVALID_HANDLE_VALUE:
                 raise IOError("Could not open disk %s" % disk_path)
@@ -149,7 +152,7 @@ else:
             start = block * cfg.block_size
             
             win32file.SetFilePointer(self.device, start, win32file.FILE_BEGIN)
-            win32file.WriteFile( self.device, [0xFF] * cfg.block_size)
+            win32file.WriteFile(self.device, [0xFF] * cfg.block_size)
             return 0
         
         def sync(self, cfg: 'LFSConfig') -> int:
