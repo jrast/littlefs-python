@@ -86,7 +86,7 @@ except ImportError:
 else:
     class UserContextWinDisk(UserContext):
         def __init__(self, disk_path:str) -> None:
-            # if the user does not 
+            # if the user does not have the pywin
             if win32file == None:
                 raise ImportError("Unable to import 'win32file'. This module is required for Windows-specific functionality. Please ensure you are running on a Windows platform or install 'pywin32' using: 'pip install pywin32'.")
             self.device = win32file.CreateFile(disk_path, win32file.GENERIC_READ, win32file.FILE_SHARE_READ, None, win32file.OPEN_EXISTING, 0, None)
