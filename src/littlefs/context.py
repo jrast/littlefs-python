@@ -1,5 +1,6 @@
 import logging
 import typing
+import ctypes 
 
 if typing.TYPE_CHECKING:
     from .lfs import LFSConfig
@@ -77,15 +78,17 @@ class UserContext:
 
 
 
-# if the user has win32file installed then define this class
-try:
-    import ctypes
-    import win32file
+# if the user has win32file installed then define this class 
+try:  
+    import win32file  
+except ImportError:
+    raise ImportError("Unable to import 'win32file'. This module is required for Windows-specific functionality. Please ensure you are running on a Windows platform or install 'pywin32' using: 'pip install pywin32'.")
+else:
     class UserContextWinDisk(UserContext):
         def __init__(self, disk_path:str) -> None:
             self.device = win32file.CreateFile(disk_path, win32file.GENERIC_READ, win32file.FILE_SHARE_READ, None, win32file.OPEN_EXISTING, 0, None)
             if self.device == win32file.INVALID_HANDLE_VALUE:
-                raise Exception("Error opening disk")
+                raise IOError("Could not open disk %s" % disk_path)
     
         def read(self, cfg: 'LFSConfig', block: int, off: int, size: int) -> bytearray:
             """read data
@@ -155,8 +158,3 @@ try:
         
         def __del__(self):
             win32file.CloseHandle(self.device)
-        
-except ImportError:
-     class UserContextWinDisk:
-        def __init__(self, disk_path: str) -> None:
-            raise ImportError("win32file module is not installed. You might need to install pywin32 or you are not not in Windows")
