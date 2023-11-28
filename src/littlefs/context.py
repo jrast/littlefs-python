@@ -83,7 +83,6 @@ try:
     import win32file
     class UserContextWinDisk(UserContext):
         def __init__(self, disk_path:str) -> None:
-            # if disk path is C drive then warn the user
             self.device = win32file.CreateFile(disk_path, win32file.GENERIC_READ, win32file.FILE_SHARE_READ, None, win32file.OPEN_EXISTING, 0, None)
             if self.device == win32file.INVALID_HANDLE_VALUE:
                 raise Exception("Error opening disk")
