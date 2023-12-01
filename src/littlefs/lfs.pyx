@@ -316,7 +316,7 @@ def fs_grow(LFSFilesystem fs, block_count) -> int:
 def remove(LFSFilesystem fs, path):
     """Remove a file or directory
 
-    If removing a direcotry, the directory must be empty.
+    If removing a directory, the directory must be empty.
     """
     return _raise_on_error(lfs_remove(&fs._impl, path.encode(FILENAME_ENCODING)))
 

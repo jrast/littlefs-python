@@ -47,9 +47,9 @@ def test_remove(fs):
 
     # Remove a directory which does not exist (with leading slash)
     with pytest.raises(FileNotFoundError) as excinfo:
-        fs.remove('/dir/directroy/')
+        fs.remove('/dir/directory/')
     assert 'LittleFSError -2' in str(excinfo.value)
-    assert '/dir/directroy/' in str(excinfo.value)
+    assert '/dir/directory/' in str(excinfo.value)
 
 
 def test_remove_recursive(fs):

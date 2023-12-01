@@ -62,9 +62,9 @@ Let's create some more files in a configuration folder:
     ...     fh.write(bytearray([0xAA, 0xBB] * 100))
     200
 
-As we wan't to place the files in a folder, the folder first needs to be created.
+As we want to place the files in a folder, the folder first needs to be created.
 The filesystem does not know the concept of a working directory. The working directory
-is allways assumed to be the root directory, therefore :code:`./config`, :code:`/config` and
+is always assumed to be the root directory, therefore :code:`./config`, :code:`/config` and
 :code:`config` have all the same meaning, use whatever you like the best.
 
 A final check to see if all required files are on the filesystem before we dump the data
@@ -90,7 +90,7 @@ This file can be written/downloaded to the actual storage.
 Inspecting a filesystem image
 =============================
 
-Sometimes it's necesary to inspect a filesystem which was previously in use
+Sometimes it's necessary to inspect a filesystem which was previously in use
 on a embedded system. Once the filesystem is available as an binary image, it's easy
 to inspect the content using littlefs-python.
 
@@ -109,7 +109,7 @@ After the buffer is initialized with the correct data, we can mount the filesyst
     >>> fs.mount()
     0
 
-Let's see whats on the filesystem:
+Let's see what's on the filesystem:
 
 .. doctest::
 
@@ -127,7 +127,7 @@ Ok, this seems to be fine. Let's check if the `actor` file was modified:
 Great, our memory contains the correct data!
 
 Now it's up to you! Play around with the data, try writing and reading other files,
-create directories or play around with differnt :code:`block_size` and :code:`block_count`
+create directories or play around with different :code:`block_size` and :code:`block_count`
 arguments.
 
 

@@ -4,7 +4,7 @@ from littlefs.errors import LittleFSError
 
 
 def test_mount_unformatted(fs, cfg):
-    """Mounting a unformated filesystem should lead to an error -84
+    """Mounting a unformatted filesystem should lead to an error -84
     which means the filesystem is corrupted
     """
     with pytest.raises(LittleFSError) as excinfo:
@@ -14,7 +14,7 @@ def test_mount_unformatted(fs, cfg):
 
 
 def test_mount_formatted(fs, cfg):
-    """Mounting a formated filesystem should work as expected"""
+    """Mounting a formatted filesystem should work as expected"""
     lfs.format(fs, cfg)
     assert lfs.mount(fs, cfg) == 0
 
