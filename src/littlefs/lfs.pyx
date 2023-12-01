@@ -152,6 +152,9 @@ cdef class LFSConfig:
         if block_size < 128:
             raise ValueError('Minimal block size is 128')
 
+        if name_max > 1022:  # LittleFS maximum name length limitation
+            raise ValueError(f"name_max must be <=1022.")
+
         self._impl.read_size = read_size if read_size else block_size
         self._impl.prog_size = prog_size if prog_size else block_size
         self._impl.block_size = block_size
