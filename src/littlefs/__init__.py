@@ -248,7 +248,7 @@ class LittleFS:
         try:
             return lfs.mkdir(self.fs, path)
         except errors.LittleFSError as e:
-            if e.code == -17:
+            if e.code == LittleFSError.Error.LFS_ERR_EXIST:
                 msg = "[LittleFSError {:d}] Cannot create a file when that file already exists: '{:s}'.".format(
                     e.code, path
                 )
@@ -316,7 +316,7 @@ class LittleFS:
                     break
                 self.remove('/'.join(parts))
             except errors.LittleFSError as e:
-                if e.code == -39:
+                if e.code == LittleFSError.Error.LFS_ERR_NOTEMPTY:
                     break
                 raise e
             parts.pop()
