@@ -45,6 +45,9 @@ setup(
             "littlefs-python = littlefs.__main__:main",
         ]
     },
+    install_requires=[
+        "importlib-metadata>=4.4; python_version < '3.10'",
+    ],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
