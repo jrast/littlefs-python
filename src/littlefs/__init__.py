@@ -2,7 +2,11 @@ import io
 import warnings
 from typing import TYPE_CHECKING, List, Tuple, Iterator, IO, Union, Optional
 
-from pkg_resources import DistributionNotFound, get_distribution
+try:
+    from importlib_metadata import version, PackageNotFoundError
+except ImportError:
+    from importlib.metadata import version, PackageNotFoundError
+
 
 from . import errors, lfs
 from .lfs import __LFS_DISK_VERSION__, __LFS_VERSION__
@@ -10,8 +14,8 @@ from .errors import LittleFSError
 
 
 try:
-    __version__ = get_distribution('littlefs-python').version
-except DistributionNotFound:
+    __version__ = version("littlefs-python")
+except PackageNotFoundError:
     # Package not installed
     pass
 

@@ -12,9 +12,12 @@ copyright = "2019 - 2023, Jürg Rast"
 author = "Jürg Rast"
 
 # The full version, including alpha/beta/rc tags
-from pkg_resources import get_distribution
+try:
+    from importlib_metadata import version as importlib_metadata_version
+except ImportError:
+    from importlib.metadata import version as importlib_metadata_version
 
-version = get_distribution("littlefs-python").version
+version = importlib_metadata_version("littlefs-python")
 release = version
 
 # The master doc must be set for read the docs.
