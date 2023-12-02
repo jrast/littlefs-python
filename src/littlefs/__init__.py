@@ -15,8 +15,9 @@ except DistributionNotFound:
     # Package not installed
     pass
 
+from .context import UserContext, UserContextWinDisk
+
 if TYPE_CHECKING:
-    from .context import UserContext
     from .lfs import LFSStat
 
 class LittleFS:
