@@ -9,8 +9,37 @@ except ImportError:
 
 
 from . import errors, lfs
-from .lfs import __LFS_DISK_VERSION__, __LFS_VERSION__
+from .lfs import (
+    __LFS_DISK_VERSION__,
+    __LFS_VERSION__,
+    LFSConfig,
+    LFSFilesystem,
+    LFSFile,
+    LFSDirectory,
+    LFSFileFlag,
+    LFSStat,
+    LFSFSStat,
+)
 from .errors import LittleFSError
+
+__all__ = [
+    "FileHandle",
+    "LFSConfig",
+    "LFSDirectory",
+    "LFSFSStat",
+    "LFSFile",
+    "LFSFileFlag",
+    "LFSFilesystem",
+    "LFSStat",
+    "LittleFS",
+    "LittleFSError",
+    "UserContext",
+    "UserContextWinDisk",
+    "__LFS_DISK_VERSION__",
+    "__LFS_VERSION__",
+    "errors",
+    "lfs",
+]
 
 
 try:

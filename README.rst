@@ -63,22 +63,21 @@ steps which must be performed in C:
 Installation
 ============
 
-.. note::
-    As littlefs_ is bundled with the package you will need to install the correct version of
-    this package in successfully read or create images for your embedded system. If you start
-    from scratch the latest version is recommended.
+As littlefs_ is bundled with the package you will need to install the correct version of
+this package in successfully read or create images for your embedded system. If you start
+from scratch the latest version is recommended.
 
-    .. csv-table::
-        :header: "Package Version", "LittleFS Version", "LittleFS File System Version"
+.. csv-table::
+    :header: "Package Version", "LittleFS Version", "LittleFS File System Version"
 
-        0.8.X, 2.8.0, 2.0 / 2.1 [#f1]_
-        0.7.X, 2.7.0, 2.0 / 2.1 [#f1]_
-        0.6.X, 2.7.0, 2.0 / 2.1 [#f1]_
-        0.5.0, 2.6.1, 2.1
-        0.4.0, 2.2.1, 2.0
-        0.3.0, 2.2.1, 2.0
+    0.8.X, 2.8.0, 2.0 / 2.1 [#f1]_
+    0.7.X, 2.7.0, 2.0 / 2.1 [#f1]_
+    0.6.X, 2.7.0, 2.0 / 2.1 [#f1]_
+    0.5.0, 2.6.1, 2.1
+    0.4.0, 2.2.1, 2.0
+    0.3.0, 2.2.1, 2.0
 
-    .. [#f1] See ``test/test_multiversion.py`` for examples.
+.. [#f1] See ``test/test_multiversion.py`` for examples.
 
 
 This is as simple as it can be::
@@ -88,9 +87,9 @@ This is as simple as it can be::
 At the moment wheels (which require no build) are provided for the following platforms,
 on other platforms the source package is used and a compiler is required:
 
- - Linux: Python 3.8 - 3.12 / x86_64, arm64
- - MacOS: Python 3.8 - 3.12 / x86_64, arm64
- - Windows: Python 3.8 - 3.12 / 32- & 64-bit
++ Linux: Python 3.8 - 3.12 / x86_64, arm64
++ MacOS: Python 3.8 - 3.12 / x86_64, arm64
++ Windows: Python 3.8 - 3.12 / 32- & 64-bit
 
 
 Development Setup
@@ -113,17 +112,15 @@ the package::
     pip install -r requirements.txt
     pip install -e .
 
-.. note::
-    It's highly recommended to install the package in a virtual environment!
-
+It's highly recommended to install the package in a virtual environment!
 
 Development Hints
 -----------------
 
-- Test should be run before committing: `pytest test`
+- Test should be run before committing: ``pytest test``
 - Mypy is used for typechecking. Run it also on the tests to catch more issues:
-  `mypy src test test/lfs`
-- Mypy stubs can be generated with `stubgen src`. This will create a `out` directory
+  ``mypy src test test/lfs``
+- Mypy stubs can be generated with ``stubgen src``. This will create a ``out`` directory
   containing the generated stub files.
 
 
@@ -143,9 +140,9 @@ OUTDATED (without github deploy action):
 - Create a tag with the new version number
 - Wait until all builds are completed. A new release should be created
   automatically on github.
-- Build the source distribution with `python setup.py sdist`
-- Download all assets (using `ci/download_release_files.py`)
-- Upload to pypi using twine: `twine upload dist/*`
+- Build the source distribution with ``python setup.py sdist``.
+- Download all assets (using ``ci/download_release_files.py``).
+- Upload to pypi using twine: ``twine upload dist/*``.
 
 
 
