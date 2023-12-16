@@ -31,21 +31,21 @@ def test_unmount(mounted_fs):
 
 def test_stat_root_directory(mounted_fs):
     """Test if stat works"""
-    stat = lfs.stat(mounted_fs, '/')
-    assert stat.type == 2, 'Expected a directory type'
-    assert stat.name == '/'
+    stat = lfs.stat(mounted_fs, "/")
+    assert stat.type == 2, "Expected a directory type"
+    assert stat.name == "/"
 
 
 def test_stat_file(mounted_fs):
-    fh = lfs.file_open(mounted_fs, 'test.txt', 'w')
-    lfs.file_write(mounted_fs, fh, b'0123456789')
+    fh = lfs.file_open(mounted_fs, "test.txt", "w")
+    lfs.file_write(mounted_fs, fh, b"0123456789")
     lfs.file_close(mounted_fs, fh)
 
-    stat = lfs.stat(mounted_fs, 'test.txt')
+    stat = lfs.stat(mounted_fs, "test.txt")
 
     assert stat.size == 10
     assert stat.type == 1
-    assert stat.name == 'test.txt'
+    assert stat.name == "test.txt"
 
 
 def test_fs_stat(mounted_fs):

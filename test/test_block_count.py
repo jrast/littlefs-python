@@ -9,16 +9,18 @@ def test_block_count_autodetect():
     context = UserContext(block_size * block_count)
 
     # Create the filesystem with 57 blocks
-    fs = LittleFS(context=context,
-                  block_size=block_size,
-                  block_count=block_count,
-                  )
+    fs = LittleFS(
+        context=context,
+        block_size=block_size,
+        block_count=block_count,
+    )
     assert fs.block_count == 57
 
-    fs = LittleFS(context=context,
-                  block_size=block_size,
-                  block_count=0,  # infer from superblock
-                  )
+    fs = LittleFS(
+        context=context,
+        block_size=block_size,
+        block_count=0,  # infer from superblock
+    )
 
     assert fs.block_count == 57
 
@@ -35,16 +37,18 @@ def test_fs_stat_block_count_autodetect():
     context = UserContext(block_size * block_count)
 
     # Create the filesystem with 57 blocks
-    fs = LittleFS(context=context,
-                  block_size=block_size,
-                  block_count=block_count,
-                  )
+    fs = LittleFS(
+        context=context,
+        block_size=block_size,
+        block_count=block_count,
+    )
     assert fs.block_count == 57
 
-    fs = LittleFS(context=context,
-                  block_size=block_size,
-                  block_count=0,  # infer from superblock
-                  )
+    fs = LittleFS(
+        context=context,
+        block_size=block_size,
+        block_count=0,  # infer from superblock
+    )
 
     # Note: filesystem has to be mounted for fs_stat to work.
     info = fs.fs_stat()

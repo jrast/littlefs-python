@@ -28,13 +28,10 @@ class LittleFSError(Exception):
         try:
             return self.Error(self.code).name
         except ValueError:
-            return 'ERR_UNKNOWN'
+            return "ERR_UNKNOWN"
 
     def __repr__(self) -> str:
-        return '<%s(%d)>' % (
-            self.__class__.__name__,
-            self.code
-        )
+        return "<%s(%d)>" % (self.__class__.__name__, self.code)
 
     def __str__(self) -> str:
-        return 'LittleFSError %d: %s' % (self.code, self.name)
+        return "LittleFSError %d: %s" % (self.code, self.name)

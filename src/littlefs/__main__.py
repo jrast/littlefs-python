@@ -19,6 +19,7 @@ def _fs_from_args(args: argparse.Namespace) -> LittleFS:
         name_max=args.name_max,
     )
 
+
 def size_parser(size_str):
     """Parse filesystem / block size in different formats"""
     size_str = str(size_str).lower()
@@ -154,22 +155,16 @@ def get_parser():
         ),
         # formatter_class=argparse.RawTextHelpFormatter,
     )
-    parser.add_argument('--version', action='version', version=__version__)
+    parser.add_argument("--version", action="version", version=__version__)
 
     common_parser = argparse.ArgumentParser(add_help=False)
     common_parser.add_argument("-v", "--verbose", action="count", default=0)
-    common_parser.add_argument(
-        "--block-size", type=size_parser, required=True, help="LittleFS block size"
-    )
-    common_parser.add_argument(
-        "--name-max", type=size_parser, default=255, help="LittleFS max file path length."
-    )
+    common_parser.add_argument("--block-size", type=size_parser, required=True, help="LittleFS block size")
+    common_parser.add_argument("--name-max", type=size_parser, default=255, help="LittleFS max file path length.")
     group = common_parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--block-count", type=int, help="LittleFS block count")
     group.add_argument("--fs-size", type=size_parser, help="LittleFS filesystem size")
-    common_parser.add_argument(
-        "--image", type=pathlib.Path, required=True, help="LittleFS filesystem image"
-    )
+    common_parser.add_argument("--image", type=pathlib.Path, required=True, help="LittleFS filesystem image")
 
     subparsers = parser.add_subparsers(required=True, title="Available Commands", dest="command")
 

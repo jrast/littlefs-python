@@ -32,6 +32,3 @@ littlefs.lfs module
 .. automodule:: littlefs.lfs
     :members:
     :undoc-members:
-
-
-
