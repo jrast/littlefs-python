@@ -483,4 +483,3 @@ def dir_tell(LFSFilesystem fs, LFSDirectory dh):
 
 def dir_rewind(LFSFilesystem fs, LFSDirectory dh):
     return _raise_on_error(lfs_dir_rewind(&fs._impl, &dh._impl))
-

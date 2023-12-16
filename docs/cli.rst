@@ -3,7 +3,7 @@
 Command Line Interface
 ======================
 
-.. argparse:: 
+.. argparse::
     :module: littlefs.__main__
     :func: get_parser
     :prog: littlefs-python

@@ -53,10 +53,11 @@ from .context import UserContext, UserContextWinDisk
 if TYPE_CHECKING:
     from .lfs import LFSStat
 
+
 class LittleFS:
     """Littlefs file system"""
 
-    def __init__(self, context:Optional['UserContext']=None, mount=True, **kwargs) -> None:
+    def __init__(self, context: Optional["UserContext"] = None, mount=True, **kwargs) -> None:
         self.cfg = lfs.LFSConfig(context=context, **kwargs)
         self.fs = lfs.LFSFilesystem()
 
@@ -72,7 +73,7 @@ class LittleFS:
         return self.fs.block_count
 
     @property
-    def context(self) -> 'UserContext':
+    def context(self) -> "UserContext":
         """User context of the file system"""
         return self.cfg.user_context
 
@@ -102,18 +103,12 @@ class LittleFS:
 
         return lfs.fs_grow(self.fs, block_count)
 
-    def fs_stat(self) -> 'LFSFSStat':
+    def fs_stat(self) -> "LFSFSStat":
         """Get the status of the filesystem"""
         return lfs.fs_stat(self.fs)
 
     def open(
-        self,
-        fname: str,
-        mode='r',
-        buffering: int = -1,
-        encoding: str = None,
-        errors: str = None,
-        newline: str = None
+        self, fname: str, mode="r", buffering: int = -1, encoding: str = None, errors: str = None, newline: str = None
     ) -> IO:
         """Open a file.
 
@@ -174,25 +169,17 @@ class LittleFS:
         exclusive_modes = (creating, reading, writing, appending)
 
         if sum(int(m) for m in exclusive_modes) > 1:
-            raise ValueError(
-                "must have exactly one of create/read/write/append mode"
-            )
+            raise ValueError("must have exactly one of create/read/write/append mode")
 
         if binary:
             if encoding is not None:
-                raise ValueError(
-                    "binary mode doesn't take an encoding argument"
-                )
+                raise ValueError("binary mode doesn't take an encoding argument")
 
             if errors is not None:
-                raise ValueError(
-                    "binary mode doesn't take an errors argument"
-                )
+                raise ValueError("binary mode doesn't take an errors argument")
 
             if newline is not None:
-                raise ValueError(
-                    "binary mode doesn't take a newline argument"
-                )
+                raise ValueError("binary mode doesn't take a newline argument")
 
             if buffering == 1:
                 msg = (
@@ -244,13 +231,7 @@ class LittleFS:
         if binary:
             return buffered
 
-        wrapped = io.TextIOWrapper(
-            buffered,
-            encoding,
-            errors,
-            newline,
-            line_buffering
-        )
+        wrapped = io.TextIOWrapper(buffered, encoding, errors, newline, line_buffering)
 
         return wrapped
 
@@ -266,7 +247,7 @@ class LittleFS:
         typ = _typ_to_uint8(typ)
         lfs.removeattr(self.fs, path, typ)
 
-    def listdir(self, path='.') -> List[str]:
+    def listdir(self, path=".") -> List[str]:
         """List directory content
 
         List the content of a directory. This function uses :meth:`scandir`
@@ -290,10 +271,10 @@ class LittleFS:
 
     def makedirs(self, name: str, exist_ok=False):
         """Recursive directory creation function."""
-        parts = [p for p in name.split('/') if p]
-        current_name = ''
+        parts = [p for p in name.split("/") if p]
+        current_name = ""
         for nr, part in enumerate(parts):
-            current_name += '/%s' % part
+            current_name += "/%s" % part
             try:
                 self.mkdir(current_name)
             except FileExistsError as e:
@@ -341,13 +322,13 @@ class LittleFS:
         function tries to recursively remove all parent directories
         which are also empty.
         """
-        parts = name.split('/')
+        parts = name.split("/")
         while parts:
             try:
-                name = '/'.join(parts)
+                name = "/".join(parts)
                 if not name:
                     break
-                self.remove('/'.join(parts))
+                self.remove("/".join(parts))
             except errors.LittleFSError as e:
                 if e.code == LittleFSError.Error.LFS_ERR_NOTEMPTY:
                     break
@@ -365,17 +346,17 @@ class LittleFS:
         """
         return self.remove(path)
 
-    def scandir(self, path='.') -> Iterator['LFSStat']:
+    def scandir(self, path=".") -> Iterator["LFSStat"]:
         """List directory content"""
         dh = lfs.dir_open(self.fs, path)
         info = lfs.dir_read(self.fs, dh)
         while info:
-            if info.name not in ['.', '..']:
+            if info.name not in [".", ".."]:
                 yield info
             info = lfs.dir_read(self.fs, dh)
         lfs.dir_close(self.fs, dh)
 
-    def stat(self, path: str) -> 'LFSStat':
+    def stat(self, path: str) -> "LFSStat":
         """Get the status of a file or directory"""
         return lfs.stat(self.fs, path)
 
@@ -408,7 +389,7 @@ class LittleFS:
 
         yield top, dirs, files
         for dirname in dirs:
-            newtop = '/'.join((top, dirname)).replace('//', '/')
+            newtop = "/".join((top, dirname)).replace("//", "/")
             yield from self.walk(newtop)
 
 
@@ -487,13 +468,14 @@ class FileHandle(io.RawIOBase):
         super().flush()
         lfs.file_sync(self.fs, self.fh)
 
+
 def _typ_to_uint8(typ):
     try:
         out = ord(typ)
     except TypeError:
         out = int(typ)
 
-    if not(0 <= out <= 255):
+    if not (0 <= out <= 255):
         raise ValueError(f"type must be in range [0, 255]")
 
     return out
