@@ -1,6 +1,6 @@
 import logging
 import enum
-from collections import namedtuple
+from typing import NamedTuple
 # Import all definitions
 # from littlefs._lfs cimport *
 
@@ -11,22 +11,25 @@ from littlefs import errors
 FILENAME_ENCODING = 'ascii'
 """Default filename encoding"""
 
-LFSStat = namedtuple('LFSStat', ['type', 'size', 'name'])
-LFSStat.__doc__ = """\
-Littlefs File / Directory status
-"""
+class LFSStat(NamedTuple):
+    """Littlefs File / Directory status."""
+    type: int
+    size: int
+    name: str
 
-LFSFSStat = namedtuple('LFSFSStat', [
-    'disk_version',
-    'name_max',
-    'file_max',
-    'attr_max',
-    'block_count',
-    'block_size',
-])
-LFSFSStat.__doc__ = """\
-Littlefs filesystem status
-"""
+    # Constants
+    TYPE_REG = LFS_TYPE_REG
+    TYPE_DIR = LFS_TYPE_DIR
+
+
+class LFSFSStat(NamedTuple):
+    """Littlefs filesystem status."""
+    disk_version: int
+    name_max: int
+    file_max: int
+    attr_max: int
+    block_count: int
+    block_size: int
 
 
 class LFSFileFlag(enum.IntFlag):
