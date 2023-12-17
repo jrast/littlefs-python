@@ -47,6 +47,10 @@ def test_stat_file(mounted_fs):
     assert stat.type == 1
     assert stat.name == "test.txt"
 
+    # Double checking that these constant got passed through.
+    assert stat.TYPE_REG == 0x001
+    assert stat.TYPE_DIR == 0x002
+
 
 def test_fs_stat(mounted_fs):
     """Test if fs stat works"""

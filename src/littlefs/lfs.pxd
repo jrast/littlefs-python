@@ -55,6 +55,10 @@ cdef extern from "lfs.h":
         LFS_F_INLINE  = 0x100000 # Currently inlined in directory entry
         LFS_F_OPENED  = 0x200000 # File has been opened
 
+    cdef enum lfs_type:
+        # littlefs-python: Only exporting public values for now.
+        LFS_TYPE_REG = 0x001
+        LFS_TYPE_DIR = 0x002
 
     cdef struct lfs:
         lfs_size_t block_count
