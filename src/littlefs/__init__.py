@@ -99,7 +99,7 @@ class LittleFS:
 
     def fs_grow(self, block_count: int) -> int:
         if block_count < self.block_count:
-            raise ValueError(f"Supplied {block_count=} cannot be smaller than current block_count {self.block_count}")
+            raise ValueError(f"Supplied block_count='{block_count}' cannot be smaller than current block_count {self.block_count}")
 
         return lfs.fs_grow(self.fs, block_count)
 
