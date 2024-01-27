@@ -68,14 +68,15 @@ this package in successfully read or create images for your embedded system. If 
 from scratch the latest version is recommended.
 
 .. csv-table::
-    :header: "Package Version", "LittleFS Version", "LittleFS File System Version"
+    :header: "LittleFS Version", "Package Version", "LittleFS File System Version"
 
-    0.8.X, 2.8.0, 2.0 / 2.1 [#f1]_
-    0.7.X, 2.7.0, 2.0 / 2.1 [#f1]_
-    0.6.X, 2.7.0, 2.0 / 2.1 [#f1]_
-    0.5.0, 2.6.1, 2.1
-    0.4.0, 2.2.1, 2.0
-    0.3.0, 2.2.1, 2.0
+    2.9.0, v0.10.X, 2.0 / 2.1 [#f]_
+    2.8.0, 0.8.X-0.9.X, 2.0 / 2.1 [#f1]_
+    2.7.0, 0.7.X, 2.0 / 2.1 [#f1]_
+    2.7.0, 0.6.X, 2.0 / 2.1 [#f1]_
+    2.6.1, 0.5.0, 2.1
+    2.2.1, 0.4.0, 2.0
+    2.2.1, 0.3.0, 2.0
 
 .. [#f1] See ``test/test_multiversion.py`` for examples.
 
