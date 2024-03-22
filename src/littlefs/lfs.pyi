@@ -12,8 +12,8 @@ class LFSStat(NamedTuple):
     name: str
 
     # Constants
-    TYPE_REG: int = LFS_TYPE_REG
-    TYPE_DIR: int = LFS_TYPE_DIR
+    TYPE_REG: int = ...
+    TYPE_DIR: int = ...
 
 class LFSFSStat(NamedTuple):
     """Littlefs filesystem status."""
