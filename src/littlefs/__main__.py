@@ -1,8 +1,11 @@
 import argparse
+from contextlib import suppress
+from pathlib import Path
 import sys
 import textwrap
-import pathlib
+
 from littlefs import LittleFS, __version__
+from littlefs.errors import LittleFSError
 
 # Dictionary mapping suffixes to their size in bytes
 _suffix_map = {
@@ -12,11 +15,12 @@ _suffix_map = {
 }
 
 
-def _fs_from_args(args: argparse.Namespace) -> LittleFS:
+def _fs_from_args(args: argparse.Namespace, mount=True) -> LittleFS:
     return LittleFS(
         block_size=args.block_size,
-        block_count=args.block_count,
+        block_count=getattr(args, "block_count", 0),
         name_max=args.name_max,
+        mount=mount,
     )
 
 
@@ -45,7 +49,9 @@ def size_parser(size_str):
     return int(size_str, base)
 
 
-def validate_args(parser: argparse.ArgumentParser, args: argparse.Namespace):
+def create(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
+    """Create LittleFS image from directory content"""
+    # fs_size OR block_count may be populated; make them consistent.
     if args.block_count is None:
         block_count = args.fs_size // args.block_size
         if block_count * args.block_size != args.fs_size:
@@ -54,45 +60,48 @@ def validate_args(parser: argparse.ArgumentParser, args: argparse.Namespace):
     else:
         args.fs_size = args.block_size * args.block_count
 
-    args.image = args.image.absolute()
-
     if args.verbose:
         print("LittleFS Configuration:")
         print(f"  Block Size:  {args.block_size:9d}  /  0x{args.block_size:X}")
         print(f"  Image Size:  {args.fs_size:9d}  /  0x{args.fs_size:X}")
         print(f"  Block Count: {args.block_count:9d}")
         print(f"  Name Max:    {args.name_max:9d}")
-        print(f"  Image:       {args.image}")
+        print(f"  Image:       {args.destination}")
 
-
-def create(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
-    """Create LittleFS image from directory content"""
-    validate_args(parser, args)
-
-    source = pathlib.Path(args.source).absolute()
+    source = Path(args.source).absolute()
     fs = _fs_from_args(args)
     for path in source.rglob("*"):
         rel_path = path.relative_to(source)
         if path.is_dir():
-            print("Adding Directory:", rel_path)
+            if args.verbose:
+                print("Adding Directory:", rel_path)
             fs.mkdir(rel_path.as_posix())
         else:
-            print("Adding File:     ", rel_path)
+            if args.verbose:
+                print("Adding File:     ", rel_path)
             with fs.open(rel_path.as_posix(), "wb") as dest:
                 dest.write(path.read_bytes())
 
-    args.image.write_bytes(fs.context.buffer)
+    args.destination.parent.mkdir(exist_ok=True, parents=True)
+    args.destination.write_bytes(fs.context.buffer)
     return 0
 
 
 def _list(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
     """List LittleFS image content"""
-    validate_args(parser, args)
-
-    fs = _fs_from_args(args)
-    fs.context.buffer = bytearray(args.image.read_bytes())
-
+    fs = _fs_from_args(args, mount=False)
+    fs.context.buffer = bytearray(args.source.read_bytes())
     fs.mount()
+
+    if args.verbose:
+        fs_size = len(fs.context.buffer)
+        print("LittleFS Configuration:")
+        print(f"  Block Size:  {args.block_size:9d}  /  0x{args.block_size:X}")
+        print(f"  Image Size:  {fs_size:9d}  /  0x{fs_size:X}")
+        print(f"  Block Count: {fs.block_count:9d}")
+        print(f"  Name Max:    {args.name_max:9d}")
+        print(f"  Image:       {args.source}")
+
     for root, dirs, files in fs.walk("/"):
         if not root.endswith("/"):
             root += "/"
@@ -105,32 +114,41 @@ def _list(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
 
 def unpack(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
     """Unpack LittleFS image to directory"""
-    validate_args(parser, args)
+    fs = _fs_from_args(args, mount=False)
+    fs.context.buffer = bytearray(args.source.read_bytes())
+    fs.mount()
 
-    fs = _fs_from_args(args)
-    with open(args.image, "rb") as fp:
-        fs.context.buffer = bytearray(fp.read())
+    if args.verbose:
+        fs_size = len(fs.context.buffer)
+        print("LittleFS Configuration:")
+        print(f"  Block Size:  {args.block_size:9d}  /  0x{args.block_size:X}")
+        print(f"  Image Size:  {fs_size:9d}  /  0x{fs_size:X}")
+        print(f"  Block Count: {fs.block_count:9d}")
+        print(f"  Name Max:    {args.name_max:9d}")
+        print(f"  Image:       {args.source}")
 
-    root_dest: pathlib.Path = args.destination
-    root_dest = root_dest.absolute()
-    if not root_dest.exists() or not root_dest.is_dir():
-        print("Destination directory does not exist")
+    root_dest = args.destination.absolute()
+    if not root_dest.exists():
+        root_dest.mkdir(parents=True)
+    if not root_dest.is_dir():
+        print("Destination must be a directory.")
         return 1
 
-    fs.mount()
     for root, dirs, files in fs.walk("/"):
         if not root.endswith("/"):
             root += "/"
         for dir in dirs:
             src_path = root + dir
             dst_path = root_dest / src_path[1:]
-            print(src_path, dst_path)
+            if args.verbose:
+                print(src_path, dst_path)
             assert root_dest in dst_path.parents
             dst_path.mkdir(exist_ok=True)
         for file in files:
             src_path = root + file
             dst_path = root_dest / src_path[1:]
-            print(src_path, dst_path)
+            if args.verbose:
+                print(src_path, dst_path)
             assert root_dest in dst_path.parents
             with fs.open(src_path, "rb") as src:
                 dst_path.write_bytes(src.read())
@@ -159,12 +177,12 @@ def get_parser():
 
     common_parser = argparse.ArgumentParser(add_help=False)
     common_parser.add_argument("-v", "--verbose", action="count", default=0)
-    common_parser.add_argument("--block-size", type=size_parser, required=True, help="LittleFS block size")
-    common_parser.add_argument("--name-max", type=size_parser, default=255, help="LittleFS max file path length.")
-    group = common_parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--block-count", type=int, help="LittleFS block count")
-    group.add_argument("--fs-size", type=size_parser, help="LittleFS filesystem size")
-    common_parser.add_argument("--image", type=pathlib.Path, required=True, help="LittleFS filesystem image")
+    common_parser.add_argument(
+        "--name-max",
+        type=size_parser,
+        default=255,
+        help="LittleFS max file path length. Defaults to LittleFS's default (255).",
+    )
 
     subparsers = parser.add_subparsers(required=True, title="Available Commands", dest="command")
 
@@ -176,12 +194,67 @@ def get_parser():
         return subparser
 
     parser_create = add_command(create)
-    parser_create.add_argument("source", help="Source Directory", type=pathlib.Path)
+    parser_create.add_argument(
+        "source",
+        type=Path,
+        help="Source directory of files to encode into a littlefs filesystem.",
+    )
+    parser_create.add_argument(
+        "destination",
+        type=Path,
+        nargs="?",
+        default=Path("lfs.bin"),
+        help="Output LittleFS filesystem binary image.",
+    )
+    parser_create.add_argument(
+        "--block-size",
+        type=size_parser,
+        required=True,
+        help="LittleFS block size.",
+    )
+    block_count_group = parser_create.add_mutually_exclusive_group(required=True)
+    block_count_group.add_argument(
+        "--block-count",
+        type=int,
+        help="LittleFS block count",
+    )
+    block_count_group.add_argument(
+        "--fs-size",
+        type=size_parser,
+        help="LittleFS filesystem size. Accepts byte units; e.g. 1MB and 1048576 are equivalent.",
+    )
 
     parser_unpack = add_command(unpack)
-    parser_unpack.add_argument("destination", help="Destination Directory", type=pathlib.Path)
+    parser_unpack.add_argument(
+        "source",
+        type=Path,
+        help="Source LittleFS filesystem binary.",
+    )
+    parser_unpack.add_argument(
+        "destination",
+        default=Path("."),
+        nargs="?",
+        type=Path,
+        help="Destination directory. Defaults to current directory.",
+    )
+    parser_unpack.add_argument(
+        "--block-size",
+        type=size_parser,
+        required=True,
+        help="LittleFS block size.",
+    )
 
     parser_list = add_command(_list, "list")
+    parser_list.add_argument(
+        "source",
+        type=Path,
+        help="Source LittleFS filesystem binary.",
+    )
+    parser_list.add_argument(
+        "--block-size",
+        type=size_parser,
+        help="LittleFS block size.",
+    )
 
     return parser
 
