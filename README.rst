@@ -70,6 +70,7 @@ from scratch the latest version is recommended.
 .. csv-table::
     :header: "LittleFS Version", "Package Version", "LittleFS File System Version"
 
+    2.9.0, v0.11.X, 2.0 / 2.1 [#f1]_
     2.9.0, v0.10.X, 2.0 / 2.1 [#f1]_
     2.8.0, 0.8.X-0.9.X, 2.0 / 2.1 [#f1]_
     2.7.0, 0.7.X, 2.0 / 2.1 [#f1]_
@@ -92,6 +93,44 @@ on other platforms the source package is used and a compiler is required:
 + MacOS: Python 3.8 - 3.12 / x86_64, arm64
 + Windows: Python 3.8 - 3.12 / 32- & 64-bit
 
+CLI
+===
+littlefs-python comes bundled with a command-line tool, ``littlefs-python``, that can be used to create and extract littlefs binary images.
+
+.. code:: console
+
+   $ littlefs-python --help
+   usage: littlefs-python [-h] [--version] {create,extract,list} ...
+
+   Create, extract and inspect LittleFS filesystem images. Use one of the
+   commands listed below, the '-h' / '--help' option can be used on each command
+   to learn more about the usage.
+
+   optional arguments:
+     -h, --help            show this help message and exit
+     --version             show program's version number and exit
+
+   Available Commands:
+     {create,extract,list}
+       create              Create LittleFS image from file/directory contents.
+       extract             Extract LittleFS image contents to a directory.
+       list                List LittleFS image contents.
+
+To create a littlefs binary image:
+
+.. code:: console
+
+   # Creates a 1-megabyte "lfs.bin" containing README.rst
+   $ littlefs-python create README.rst lfs.bin --fs-size=1mb --block-size=4096
+
+   # Creates a 1-megabyte "lfs.bin" containing the contents of the examples/ folder
+   $ littlefs-python create examples lfs.bin --fs-size=1mb --block-size=4096
+
+To extract the contents of a littlefs binary image:
+
+.. code:: console
+
+   $ littlefs-python extract lfs.bin output/ --block-size=4096
 
 Development Setup
 =================

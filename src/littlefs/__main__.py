@@ -50,7 +50,7 @@ def size_parser(size_str):
 
 
 def create(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
-    """Create LittleFS image from directory content"""
+    """Create LittleFS image from file/directory contents."""
     # fs_size OR block_count may be populated; make them consistent.
     if args.block_count is None:
         block_count = args.fs_size // args.block_size
@@ -69,9 +69,16 @@ def create(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
         print(f"  Image:       {args.destination}")
 
     source = Path(args.source).absolute()
+    if source.is_dir():
+        sources = source.rglob("*")
+        root = source
+    else:
+        sources = [source]
+        root = source.parent
+
     fs = _fs_from_args(args)
-    for path in source.rglob("*"):
-        rel_path = path.relative_to(source)
+    for path in sources:
+        rel_path = path.relative_to(root)
         if path.is_dir():
             if args.verbose:
                 print("Adding Directory:", rel_path)
@@ -88,7 +95,7 @@ def create(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
 
 
 def _list(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
-    """List LittleFS image content"""
+    """List LittleFS image contents."""
     fs = _fs_from_args(args, mount=False)
     fs.context.buffer = bytearray(args.source.read_bytes())
     fs.mount()
@@ -112,8 +119,8 @@ def _list(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
     return 0
 
 
-def unpack(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
-    """Unpack LittleFS image to directory"""
+def extract(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
+    """Extract LittleFS image contents to a directory."""
     fs = _fs_from_args(args, mount=False)
     fs.context.buffer = bytearray(args.source.read_bytes())
     fs.mount()
@@ -197,7 +204,7 @@ def get_parser():
     parser_create.add_argument(
         "source",
         type=Path,
-        help="Source directory of files to encode into a littlefs filesystem.",
+        help="Source file/directory-of-files to encode into a littlefs filesystem.",
     )
     parser_create.add_argument(
         "destination",
@@ -224,20 +231,20 @@ def get_parser():
         help="LittleFS filesystem size. Accepts byte units; e.g. 1MB and 1048576 are equivalent.",
     )
 
-    parser_unpack = add_command(unpack)
-    parser_unpack.add_argument(
+    parser_extract = add_command(extract)
+    parser_extract.add_argument(
         "source",
         type=Path,
         help="Source LittleFS filesystem binary.",
     )
-    parser_unpack.add_argument(
+    parser_extract.add_argument(
         "destination",
         default=Path("."),
         nargs="?",
         type=Path,
         help="Destination directory. Defaults to current directory.",
     )
-    parser_unpack.add_argument(
+    parser_extract.add_argument(
         "--block-size",
         type=size_parser,
         required=True,
