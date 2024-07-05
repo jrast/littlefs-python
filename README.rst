@@ -89,9 +89,9 @@ This is as simple as it can be::
 At the moment wheels (which require no build) are provided for the following platforms,
 on other platforms the source package is used and a compiler is required:
 
-+ Linux: Python 3.8 - 3.12 / x86_64, arm64
-+ MacOS: Python 3.8 - 3.12 / x86_64, arm64
-+ Windows: Python 3.8 - 3.12 / 32- & 64-bit
++ Linux: Python 3.7 - 3.12 / x86_64, arm64
++ MacOS: Python 3.7 - 3.12 / x86_64, arm64
++ Windows: Python 3.7 - 3.12 / 32- & 64-bit
 
 CLI
 ===
