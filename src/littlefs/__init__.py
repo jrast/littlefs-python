@@ -102,6 +102,10 @@ class LittleFS:
         return lfs.fs_mkconsistent(self.fs)
 
     def fs_grow(self, block_count: int) -> int:
+        """WARNING: does not modify underlying ``self.context``.
+
+        Must be done externally.
+        """
         if block_count < self.block_count:
             raise ValueError(
                 f"Supplied block_count='{block_count}' cannot be smaller than current block_count {self.block_count}"
@@ -114,10 +118,6 @@ class LittleFS:
         return lfs.fs_stat(self.fs)
 
     def fs_gc(self):
-        """WARNING: does not modify underlying ``self.context``.
-
-        Must be done externally.
-        """
         return lfs.fs_gc(self.fs)
 
     def open(
