@@ -283,6 +283,8 @@ def fs_stat(LFSFilesystem fs):
 def fs_size(LFSFilesystem fs):
     return _raise_on_error(lfs_fs_size(&fs._impl))
 
+def fs_gc(LFSFilesystem fs):
+    return _raise_on_error(lfs_fs_gc(&fs._impl))
 
 def format(LFSFilesystem fs, LFSConfig cfg):
     """Format the filesystem"""
