@@ -89,8 +89,33 @@ def create(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
             with fs.open(rel_path.as_posix(), "wb") as dest:
                 dest.write(path.read_bytes())
 
+    if args.compact:
+        if args.verbose:
+            print(f"Compacting... {fs.used_block_count} / {args.block_count}")
+        compact_fs = LittleFS(
+            block_size=args.block_size,
+            block_count=fs.used_block_count,
+            name_max=args.name_max,
+        )
+        for root, dirs, files in fs.walk("/"):
+            if not root.endswith("/"):
+                root += "/"
+            for _dir in dirs:
+                compact_fs.makedirs(root + _dir, exist_ok=True)
+            for file in files:
+                path = root + file
+                print(path)
+                with fs.open(path, "rb") as src, compact_fs.open(path, "wb") as dest:
+                    dest.write(src.read())
+        compact_fs.fs_grow(args.block_count)
+        data = compact_fs.context.buffer
+        if not args.no_pad:
+            data = data.ljust(args.fs_size, b"\xFF")
+    else:
+        data = fs.context.buffer
+
     args.destination.parent.mkdir(exist_ok=True, parents=True)
-    args.destination.write_bytes(fs.context.buffer)
+    args.destination.write_bytes(data)
     return 0
 
 
@@ -218,6 +243,16 @@ def get_parser():
         type=size_parser,
         required=True,
         help="LittleFS block size.",
+    )
+    parser_create.add_argument(
+        "--compact",
+        action="store_true",
+        help="Store all data in the beginning blocks.",
+    )
+    parser_create.add_argument(
+        "--no-pad",
+        action="store_true",
+        help="Do not pad the binary to-size with 0xFF. Only valid with --compact.",
     )
     block_count_group = parser_create.add_mutually_exclusive_group(required=True)
     block_count_group.add_argument(

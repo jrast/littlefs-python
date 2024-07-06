@@ -73,6 +73,10 @@ class LittleFS:
         return self.fs.block_count
 
     @property
+    def used_block_count(self) -> int:
+        return lfs.fs_size(self.fs)
+
+    @property
     def context(self) -> "UserContext":
         """User context of the file system"""
         return self.cfg.user_context
@@ -98,6 +102,10 @@ class LittleFS:
         return lfs.fs_mkconsistent(self.fs)
 
     def fs_grow(self, block_count: int) -> int:
+        """WARNING: does not modify underlying ``self.context``.
+
+        Must be done externally.
+        """
         if block_count < self.block_count:
             raise ValueError(
                 f"Supplied block_count='{block_count}' cannot be smaller than current block_count {self.block_count}"
@@ -108,6 +116,9 @@ class LittleFS:
     def fs_stat(self) -> "LFSFSStat":
         """Get the status of the filesystem"""
         return lfs.fs_stat(self.fs)
+
+    def fs_gc(self):
+        return lfs.fs_gc(self.fs)
 
     def open(
         self, fname: str, mode="r", buffering: int = -1, encoding: str = None, errors: str = None, newline: str = None
