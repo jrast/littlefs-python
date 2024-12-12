@@ -70,7 +70,8 @@ from scratch the latest version is recommended.
 .. csv-table::
     :header: "LittleFS Version", "Package Version", "LittleFS File System Version"
 
-    2.9.0, v0.11.X, 2.0 / 2.1 [#f1]_
+    2.10.0, v0.13.X, 2.0 / 2.1 [#f1]_
+    2.9.0, v0.12.X v0.11.X, 2.0 / 2.1 [#f1]_
     2.9.0, v0.10.X, 2.0 / 2.1 [#f1]_
     2.8.0, 0.8.X-0.9.X, 2.0 / 2.1 [#f1]_
     2.7.0, 0.7.X, 2.0 / 2.1 [#f1]_

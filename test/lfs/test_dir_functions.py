@@ -23,7 +23,7 @@ def test_dir_close(testfs):
 
 
 def test_dir_read(testfs):
-    dh = lfs.dir_open(testfs, "")
+    dh = lfs.dir_open(testfs, "/")
     info = lfs.dir_read(testfs, dh)
     assert info.name == "."
 
@@ -35,7 +35,7 @@ def test_dir_read(testfs):
 
 
 def test_dir_read_overflow(testfs):
-    dh = lfs.dir_open(testfs, "")
+    dh = lfs.dir_open(testfs, "/")
 
     # There are three directories: ., .., testdir
     for _ in range(3):
@@ -49,7 +49,7 @@ def test_dir_read_overflow(testfs):
 
 def test_dir_rewind(testfs):
     dirs = [".", "..", "testdir"]
-    dh = lfs.dir_open(testfs, "")
+    dh = lfs.dir_open(testfs, "/")
 
     for name in dirs:
         info = lfs.dir_read(testfs, dh)
