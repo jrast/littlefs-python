@@ -295,6 +295,7 @@ def get_parser():
     parser_list.add_argument(
         "--block-size",
         type=size_parser,
+        required=True,
         help="LittleFS block size.",
     )
 
