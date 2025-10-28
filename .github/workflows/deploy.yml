@@ -1,6 +1,13 @@
 name: Build and Deploy Package
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      upload_to_pypi:
+        description: 'Upload to PyPI after building'
+        required: true
+        default: false
+        type: boolean
 
 jobs:
   build_wheels:
@@ -101,7 +108,7 @@ jobs:
   upload_pypi:
     needs: [build_wheels, build_wheels_macos_arm64, build_sdist]
     runs-on: ubuntu-22.04
-    # if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/')
+    if: ${{ inputs.upload_to_pypi }}
     steps:
       - uses: actions/download-artifact@v6
         with:
