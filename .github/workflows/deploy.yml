@@ -26,6 +26,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           submodules: "recursive"
+          fetch-depth: 0
 
       - name: Setup QEMU # Needed to build aarch64 wheels
         if: runner.os == 'Linux'
@@ -53,6 +54,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           submodules: "recursive"
+          fetch-depth: 0
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.2.1
@@ -94,6 +96,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           submodules: "recursive"
+          fetch-depth: 0
 
       - name: Build sdist
         run: |
