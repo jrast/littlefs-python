@@ -11,6 +11,9 @@ from libc.stdint cimport uint8_t, int32_t, uint32_t
 from libc.stdlib cimport malloc, free
 from libc.string cimport memcpy
 
+cdef extern from "limits.h":
+    pass
+
 
 cdef extern from "lfs.h":
 
