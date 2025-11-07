@@ -34,6 +34,7 @@ __all__ = [
     "LittleFS",
     "LittleFSError",
     "UserContext",
+    "UserContextFile",
     "UserContextWinDisk",
     "__LFS_DISK_VERSION__",
     "__LFS_VERSION__",
@@ -48,7 +49,7 @@ except PackageNotFoundError:
     # Package not installed
     pass
 
-from .context import UserContext, UserContextWinDisk
+from .context import UserContext, UserContextFile, UserContextWinDisk
 
 if TYPE_CHECKING:
     from .lfs import LFSStat
