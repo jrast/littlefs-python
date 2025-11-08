@@ -3,6 +3,7 @@ from __future__ import annotations
 import cmd
 import posixpath
 import shlex
+import sys
 from pathlib import Path
 from typing import BinaryIO
 
@@ -19,6 +20,7 @@ class LittleFSRepl(cmd.Cmd):
         super().__init__()
         self._fs = fs
         self._mounted = False
+        self._cwd = "/"
 
     def onecmd(self, line: str) -> bool:
         """Dispatch a command while converting unexpected errors to readable messages."""
@@ -35,9 +37,9 @@ class LittleFSRepl(cmd.Cmd):
 
     def _resolve_path(self, raw_path: str | None) -> str:
         """Normalize local CLI paths into absolute LittleFS paths."""
-        candidate = raw_path.strip() if raw_path and raw_path.strip() else "/"
+        candidate = raw_path.strip() if raw_path and raw_path.strip() else self._cwd
         if not candidate.startswith("/"):
-            candidate = f"/{candidate}"
+            candidate = posixpath.join(self._cwd, candidate)
         normalized = posixpath.normpath(candidate)
         return "/" if normalized in ("", ".") else normalized
 
@@ -69,6 +71,7 @@ class LittleFSRepl(cmd.Cmd):
             raise RuntimeError("Filesystem already mounted.")
         self._fs.mount()
         self._mounted = True
+        self._cwd = "/"
         print("Mounted remote littlefs.")
 
     def do_unmount(self, _: str = "") -> None:
@@ -77,6 +80,7 @@ class LittleFSRepl(cmd.Cmd):
             raise RuntimeError("Filesystem already unmounted.")
         self._fs.unmount()
         self._mounted = False
+        self._cwd = "/"
         print("Unmounted remote littlefs.")
 
     def do_ls(self, line: str = "") -> None:
@@ -90,6 +94,21 @@ class LittleFSRepl(cmd.Cmd):
     def do_dir(self, line: str = "") -> None:
         """Alias for ls (Windows muscle memory)."""
         self.do_ls(line)
+
+    def do_cd(self, line: str = "") -> None:
+        """Change the current working directory."""
+        self._ensure_mounted()
+        target = "/" if not line.strip() else self._resolve_path(line)
+        stat = self._fs.stat(target)
+        if stat.type != LFSStat.TYPE_DIR:
+            raise NotADirectoryError(f"Not a directory: {target}")
+        self._cwd = target
+        print(self._cwd)
+
+    def do_pwd(self, _: str = "") -> None:
+        """Print the current working directory."""
+        self._ensure_mounted()
+        print(self._cwd)
 
     def do_tree(self, line: str = "") -> None:
         """Print the directory tree rooted at the provided path."""
@@ -151,6 +170,75 @@ class LittleFSRepl(cmd.Cmd):
         with self._fs.open(remote_path, "rb") as src, open(local_path, "wb") as dst:
             self._copy_stream(src, dst)
         print(f"Got {remote_path} -> {local_path}")
+
+    def do_cat(self, line: str = "") -> None:
+        """Print the contents of a remote file to stdout."""
+        self._ensure_mounted()
+        args = shlex.split(line)
+        if not args:
+            raise ValueError("Usage: cat <remote_path>")
+        remote_path = self._resolve_path(args[0])
+        with self._fs.open(remote_path, "rb") as src:
+            self._copy_stream(src, sys.stdout.buffer)
+        sys.stdout.buffer.flush()
+
+    def do_xxd(self, line: str = "") -> None:
+        """Show a hexadecimal dump of a remote file."""
+        self._ensure_mounted()
+        args = shlex.split(line)
+        if not args:
+            raise ValueError("Usage: xxd <remote_path>")
+
+        remote_path = self._resolve_path(args[0])
+        offset = 0
+        with self._fs.open(remote_path, "rb") as src:
+            while True:
+                chunk = src.read(16)
+                if not chunk:
+                    break
+                hex_pairs = [f"{byte:02x}" for byte in chunk]
+                first_half = " ".join(hex_pairs[:8])
+                second_half = " ".join(hex_pairs[8:])
+                hex_line = f"{first_half:<23} {second_half:<23}".rstrip()
+                ascii_line = "".join(chr(b) if 32 <= b < 127 else "." for b in chunk)
+                print(f"{offset:08x}: {hex_line:<48}  {ascii_line}")
+                offset += len(chunk)
+
+    def do_mkdir(self, line: str) -> None:
+        """Create a directory (use -p to create parents)."""
+        self._ensure_mounted()
+        args = shlex.split(line)
+        if not args:
+            raise ValueError("Usage: mkdir [-p] <remote_path>")
+        recursive = False
+        target_arg = args[0]
+        if args[0] == "-p":
+            if len(args) < 2:
+                raise ValueError("Usage: mkdir [-p] <remote_path>")
+            recursive = True
+            target_arg = args[1]
+        target = self._resolve_path(target_arg)
+        if recursive:
+            self._fs.makedirs(target, exist_ok=True)
+        else:
+            self._fs.mkdir(target)
+        print(f"Created directory {target}")
+
+    def do_mv(self, line: str) -> None:
+        """Rename or move a file or directory."""
+        self._ensure_mounted()
+        args = shlex.split(line)
+        if len(args) != 2:
+            raise ValueError("Usage: mv <source> <destination>")
+        src = self._resolve_path(args[0])
+        dst = self._resolve_path(args[1])
+        self._fs.rename(src, dst)
+        if self._cwd == src:
+            self._cwd = dst
+        elif self._cwd.startswith(f"{src}/"):
+            suffix = self._cwd[len(src) :]
+            self._cwd = posixpath.normpath(f"{dst}{suffix}")
+        print(f"Moved {src} -> {dst}")
 
     def do_rm(self, line: str) -> None:
         """Remove a file or directory (use -r for recursive removal)."""
