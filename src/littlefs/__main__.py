@@ -6,6 +6,8 @@ import textwrap
 
 from littlefs import LittleFS, __version__
 from littlefs.errors import LittleFSError
+from littlefs.repl import LittleFSRepl
+from littlefs.context import UserContextFile
 
 # Dictionary mapping suffixes to their size in bytes
 _suffix_map = {
@@ -110,7 +112,7 @@ def create(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
         compact_fs.fs_grow(args.block_count)
         data = compact_fs.context.buffer
         if not args.no_pad:
-            data = data.ljust(args.fs_size, b"\xFF")
+            data = data.ljust(args.fs_size, b"\xff")
     else:
         data = fs.context.buffer
 
@@ -184,6 +186,47 @@ def extract(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
             assert root_dest in dst_path.parents
             with fs.open(src_path, "rb") as src:
                 dst_path.write_bytes(src.read())
+
+    return 0
+
+
+def repl(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
+    """Inspect an existing LittleFS image through an interactive shell."""
+
+    source: Path = args.source
+    if not source.is_file():
+        parser.error(f"Source image '{source}' does not exist.")
+
+    image_size = source.stat().st_size
+    if not image_size or image_size % args.block_size:
+        parser.error(
+            f"Image size ({image_size} bytes) is not a multiple of the supplied block size ({args.block_size})."
+        )
+
+    block_count = image_size // args.block_size
+    if block_count == 0:
+        parser.error("Image is smaller than a single block; cannot mount.")
+
+    context = UserContextFile(str(source))
+    fs = LittleFS(
+        context=context,
+        block_size=args.block_size,
+        block_count=block_count,
+        name_max=args.name_max,
+        mount=False,
+    )
+
+    shell = LittleFSRepl(fs)
+    try:
+        try:
+            shell.do_mount()
+        except LittleFSError as exc:
+            parser.error(f"Failed to mount '{source}': {exc}")
+        shell.cmdloop()
+    finally:
+        if shell._mounted:
+            with suppress(LittleFSError):
+                fs.unmount()
 
     return 0
 
@@ -293,6 +336,19 @@ def get_parser():
         help="Source LittleFS filesystem binary.",
     )
     parser_list.add_argument(
+        "--block-size",
+        type=size_parser,
+        required=True,
+        help="LittleFS block size.",
+    )
+
+    parser_repl = add_command(repl)
+    parser_repl.add_argument(
+        "source",
+        type=Path,
+        help="Source LittleFS filesystem binary.",
+    )
+    parser_repl.add_argument(
         "--block-size",
         type=size_parser,
         required=True,
