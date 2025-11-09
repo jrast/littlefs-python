@@ -103,7 +103,7 @@ littlefs-python comes bundled with a command-line tool, ``littlefs-python``, tha
 .. code:: console
 
    $ littlefs-python --help
-   usage: littlefs-python [-h] [--version] {create,extract,list} ...
+   usage: littlefs-python [-h] [--version] {create,extract,list,repl} ...
 
    Create, extract and inspect LittleFS filesystem images. Use one of the
    commands listed below, the '-h' / '--help' option can be used on each command
@@ -114,10 +114,11 @@ littlefs-python comes bundled with a command-line tool, ``littlefs-python``, tha
      --version             show program's version number and exit
 
    Available Commands:
-     {create,extract,list}
+     {create,extract,list,repl}
        create              Create LittleFS image from file/directory contents.
        extract             Extract LittleFS image contents to a directory.
        list                List LittleFS image contents.
+       repl                Inspect an existing LittleFS image through an interactive shell.
 
 To create a littlefs binary image:
 
@@ -134,6 +135,17 @@ To extract the contents of a littlefs binary image:
 .. code:: console
 
    $ littlefs-python extract lfs.bin output/ --block-size=4096
+
+To inspect or debug an existing image without extracting it first you can start a
+simple REPL. It provides shell-like commands such as ``ls``, ``tree``, ``put``, ``get``
+and ``rm`` that operate directly on the image data:
+
+.. code:: console
+
+   $ littlefs-python repl lfs.bin --block-size=4096
+   Mounted remote littlefs.
+   littlefs> ls
+   README.rst
 
 Development Setup
 =================

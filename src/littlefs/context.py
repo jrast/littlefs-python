@@ -1,6 +1,7 @@
 import logging
 import typing
 import ctypes
+import os
 
 if typing.TYPE_CHECKING:
     from .lfs import LFSConfig
@@ -76,6 +77,60 @@ class UserContext:
             Filesystem configuration object
         """
         return 0
+
+
+class UserContextFile(UserContext):
+    """File-backed context using the standard library"""
+
+    def __init__(self, file_path: str, *, create: bool = False) -> None:
+        mode = "r+b"
+        if not os.path.exists(file_path):
+            if not create:
+                raise FileNotFoundError(f"Context file '{file_path}' does not exist")
+            mode = "w+b"
+
+        self._path = file_path
+        self._fh = open(file_path, mode)
+
+    def read(self, cfg: "LFSConfig", block: int, off: int, size: int) -> bytearray:
+        logging.getLogger(__name__).debug("LFS Read : Block: %d, Offset: %d, Size=%d" % (block, off, size))
+        start = block * cfg.block_size + off
+        self._fh.seek(start)
+        data = self._fh.read(size)
+
+        if len(data) < size:
+            data += b"\xff" * (size - len(data))
+
+        return bytearray(data)
+
+    def prog(self, cfg: "LFSConfig", block: int, off: int, data: bytes) -> int:
+        logging.getLogger(__name__).debug("LFS Prog : Block: %d, Offset: %d, Data=%r" % (block, off, data))
+        start = block * cfg.block_size + off
+        self._fh.seek(start)
+        self._fh.write(data)
+        return 0
+
+    def erase(self, cfg: "LFSConfig", block: int) -> int:
+        logging.getLogger(__name__).debug("LFS Erase: Block: %d" % block)
+        start = block * cfg.block_size
+        self._fh.seek(start)
+        self._fh.write(b"\xff" * cfg.block_size)
+        return 0
+
+    def sync(self, cfg: "LFSConfig") -> int:
+        self._fh.flush()
+        os.fsync(self._fh.fileno())
+        return 0
+
+    def close(self) -> None:
+        if not self._fh.closed:
+            self._fh.close()
+
+    def __del__(self):
+        try:
+            self.close()
+        except Exception:
+            pass
 
 
 try:
