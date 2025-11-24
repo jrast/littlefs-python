@@ -23,7 +23,7 @@ jobs:
       CIBW_ARCHS_LINUX: "x86_64 i686 aarch64"
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: "recursive"
           fetch-depth: 0
@@ -51,7 +51,7 @@ jobs:
         cibw_archs: ["arm64"]
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: "recursive"
           fetch-depth: 0
@@ -93,7 +93,7 @@ jobs:
     name: Build source distribution
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: "recursive"
           fetch-depth: 0
