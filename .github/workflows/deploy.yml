@@ -37,7 +37,7 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.3.0
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: wheels-${{ matrix.os }}
           path: ./wheelhouse/*.whl
@@ -84,7 +84,7 @@ jobs:
             delocate-listdeps --all {dest_dir}/$WHEEL_SIMPLE_FILENAME
 
             echo "DONE."
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: wheels-macos-arm64
           path: ./wheelhouse/*.whl
@@ -103,7 +103,7 @@ jobs:
           pip install build
           python -m build . --sdist
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: wheels-sdist
           path: dist/*.tar.gz
