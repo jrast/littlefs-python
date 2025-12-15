@@ -113,7 +113,7 @@ jobs:
     runs-on: ubuntu-22.04
     if: ${{ inputs.upload_to_pypi }}
     steps:
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           path: dist
           pattern: wheels-*
