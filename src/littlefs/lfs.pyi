@@ -45,6 +45,7 @@ class LFSConfig:
         file_max: int = 0,
         attr_max: int = 0,
         metadata_max: int = 0,
+        inline_max: int = 0,
         disk_version: int = 0,
     ) -> None: ...
     @property
@@ -65,6 +66,10 @@ class LFSConfig:
     def file_max(self) -> int: ...
     @property
     def attr_max(self) -> int: ...
+    @property
+    def metadata_max(self) -> int: ...
+    @property
+    def inline_max(self) -> int: ...
 
 class LFSFilesystem:
     @property
