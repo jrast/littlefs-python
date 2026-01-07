@@ -104,6 +104,7 @@ cdef class LFSConfig:
                  file_max: int = 0,
                  attr_max: int = 0,
                  metadata_max: int = 0,
+                 inline_max: int = 0,
                  disk_version: int = 0,
                 ):
         """LittleFS Configuration.
@@ -149,6 +150,7 @@ cdef class LFSConfig:
         file_max: int
         attr_max: int
         metadata_max: int
+        inline_max: int
         disk_version: int
         """
 
@@ -171,6 +173,7 @@ cdef class LFSConfig:
         self._impl.file_max = file_max
         self._impl.attr_max = attr_max
         self._impl.metadata_max = metadata_max
+        self._impl.inline_max = inline_max
         self._impl.disk_version = disk_version
 
         if context is None:
@@ -193,6 +196,7 @@ cdef class LFSConfig:
             f"file_max={self._impl.file_max}",
             f"attr_max={self._impl.attr_max}",
             f"metadata_max={self._impl.metadata_max}",
+            f"inline_max={self._impl.inline_max}",
             f"disk_version={self._impl.disk_version}"
         )
         return f"{self.__class__.__name__}({', '.join(args)})"
@@ -236,6 +240,10 @@ cdef class LFSConfig:
     @property
     def metadata_max(self):
         return self._impl.metadata_max
+
+    @property
+    def inline_max(self):
+        return self._impl.inline_max
 
     @property
     def disk_version(self):
