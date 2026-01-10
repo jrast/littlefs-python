@@ -72,7 +72,7 @@ def create(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
 
     source = Path(args.source).absolute()
     if source.is_dir():
-        sources = source.rglob("*")
+        sources = source.rglob("*", recurse_symlinks=True)
         root = source
     else:
         sources = [source]
@@ -367,3 +367,4 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
+
