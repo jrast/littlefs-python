@@ -65,6 +65,10 @@ class LittleFSRepl(cmd.Cmd):
                 break
             dst.write(chunk)
 
+    def emptyline(self):
+        """Override to prevent repeating the last command."""
+        pass
+
     def do_mount(self, _: str = "") -> None:
         """Attempt to mount the remote filesystem."""
         if self._mounted:
