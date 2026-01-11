@@ -1,5 +1,6 @@
 import argparse
 from contextlib import suppress
+import os
 from pathlib import Path
 import sys
 import textwrap
@@ -51,6 +52,16 @@ def size_parser(size_str):
     return int(size_str, base)
 
 
+def _walk_all(root):
+    """Recursively yield all paths under root, following symlinks."""
+    for dirpath, dirnames, filenames in os.walk(root, followlinks=True):
+        dirpath = Path(dirpath)
+        for dirname in dirnames:
+            yield dirpath / dirname
+        for filename in filenames:
+            yield dirpath / filename
+
+
 def create(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
     """Create LittleFS image from file/directory contents."""
     # fs_size OR block_count may be populated; make them consistent.
@@ -72,7 +83,7 @@ def create(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
 
     source = Path(args.source).absolute()
     if source.is_dir():
-        sources = source.rglob("*", recurse_symlinks=True)
+        sources = _walk_all(source)
         root = source
     else:
         sources = [source]
