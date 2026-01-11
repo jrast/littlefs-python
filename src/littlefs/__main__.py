@@ -106,7 +106,6 @@ def create(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
                 compact_fs.makedirs(root + _dir, exist_ok=True)
             for file in files:
                 path = root + file
-                print(path)
                 with fs.open(path, "rb") as src, compact_fs.open(path, "wb") as dest:
                     dest.write(src.read())
         compact_fs.fs_grow(args.block_count)
