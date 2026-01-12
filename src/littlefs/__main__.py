@@ -367,11 +367,13 @@ def get_parser():
 
     return parser
 
-
-def main():
+# Getting argv optionally from the caller to enable call from python (generally for testing, but could be used for other purposes)
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv
     parser = get_parser()
-    parser.parse_known_args(sys.argv[1:])  # Allows for ``littlefs-python --version``
-    args = parser.parse_args(sys.argv[1:])
+    parser.parse_known_args(argv[1:])  # Allows for ``littlefs-python --version``
+    args = parser.parse_args(argv[1:])
     return args.func(parser, args)
 
 
