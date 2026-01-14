@@ -8,7 +8,7 @@ import textwrap
 from littlefs import LittleFS, __version__
 from littlefs.errors import LittleFSError
 from littlefs.repl import LittleFSRepl
-from littlefs.context import UserContextFile
+from littlefs.context import UserContextFile, UserContext
 
 # Dictionary mapping suffixes to their size in bytes
 _suffix_map = {
@@ -18,10 +18,12 @@ _suffix_map = {
 }
 
 
-def _fs_from_args(args: argparse.Namespace, mount=True) -> LittleFS:
+def _fs_from_args(args: argparse.Namespace, block_count=None, mount=True, context: UserContext = None) -> LittleFS:
+    block_count=block_count if block_count is not None else getattr(args, "block_count", 0)
     return LittleFS(
+        context=context,
         block_size=args.block_size,
-        block_count=getattr(args, "block_count", 0),
+        block_count=block_count,
         name_max=args.name_max,
         mount=mount,
     )
@@ -105,11 +107,7 @@ def create(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
     if args.compact:
         if args.verbose:
             print(f"Compacting... {fs.used_block_count} / {args.block_count}")
-        compact_fs = LittleFS(
-            block_size=args.block_size,
-            block_count=fs.used_block_count,
-            name_max=args.name_max,
-        )
+        compact_fs = _fs_from_args(args, block_count=fs.used_block_count)
         for root, dirs, files in fs.walk("/"):
             if not root.endswith("/"):
                 root += "/"
@@ -131,20 +129,36 @@ def create(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
     return 0
 
 
-def _list(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
-    """List LittleFS image contents."""
-    fs = _fs_from_args(args, mount=False)
-    fs.context.buffer = bytearray(args.source.read_bytes())
+def _mount_from_context(parser: argparse.ArgumentParser, args: argparse.Namespace, context: UserContext) -> LittleFS:
+    # Block count is 0 because we don't know the size of the real image yet, the source file may be compacted (with the create --compact option).
+    fs = _fs_from_args(args, block_count=0, mount=False, context=context) 
     fs.mount()
-
+    
     if args.verbose:
-        fs_size = len(fs.context.buffer)
+        input_image_size = len(fs.context.buffer)
+        actual_image_size = fs.block_count * args.block_size
         print("LittleFS Configuration:")
         print(f"  Block Size:  {args.block_size:9d}  /  0x{args.block_size:X}")
-        print(f"  Image Size:  {fs_size:9d}  /  0x{fs_size:X}")
+        if input_image_size != actual_image_size:
+            print(f"  Image Size:  {actual_image_size:9d}  /  0x{actual_image_size:X}")
+            print(f"  Input Image Size (compacted): {input_image_size:9d}  /  0x{input_image_size:X}")
+        else:
+            print(f"  Image Size:  {input_image_size:9d}  /  0x{input_image_size:X}")
         print(f"  Block Count: {fs.block_count:9d}")
         print(f"  Name Max:    {args.name_max:9d}")
         print(f"  Image:       {args.source}")
+
+    return fs
+
+
+def _list(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
+    """List LittleFS image contents."""
+    source: Path = args.source
+    if not source.is_file():
+        parser.error(f"Source image '{source}' does not exist.")
+    context = UserContext(buffer=bytearray(source.read_bytes()))
+
+    fs = _mount_from_context(parser, args, context)
 
     for root, dirs, files in fs.walk("/"):
         if not root.endswith("/"):
@@ -158,18 +172,12 @@ def _list(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
 
 def extract(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
     """Extract LittleFS image contents to a directory."""
-    fs = _fs_from_args(args, mount=False)
-    fs.context.buffer = bytearray(args.source.read_bytes())
-    fs.mount()
+    source: Path = args.source
+    if not source.is_file():
+        parser.error(f"Source image '{source}' does not exist.")
+    context = UserContext(buffer=bytearray(source.read_bytes()))
 
-    if args.verbose:
-        fs_size = len(fs.context.buffer)
-        print("LittleFS Configuration:")
-        print(f"  Block Size:  {args.block_size:9d}  /  0x{args.block_size:X}")
-        print(f"  Image Size:  {fs_size:9d}  /  0x{fs_size:X}")
-        print(f"  Block Count: {fs.block_count:9d}")
-        print(f"  Name Max:    {args.name_max:9d}")
-        print(f"  Image:       {args.source}")
+    fs = _mount_from_context(parser, args, context)
 
     root_dest = args.destination.absolute()
     if not root_dest.exists():
@@ -202,41 +210,20 @@ def extract(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
 
 def repl(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
     """Inspect an existing LittleFS image through an interactive shell."""
-
     source: Path = args.source
     if not source.is_file():
         parser.error(f"Source image '{source}' does not exist.")
+    context = UserContextFile(str(source)) # In repl we want context to be the file itself, so commands will change it
 
-    image_size = source.stat().st_size
-    if not image_size or image_size % args.block_size:
-        parser.error(
-            f"Image size ({image_size} bytes) is not a multiple of the supplied block size ({args.block_size})."
-        )
-
-    block_count = image_size // args.block_size
-    if block_count == 0:
-        parser.error("Image is smaller than a single block; cannot mount.")
-
-    context = UserContextFile(str(source))
-    fs = LittleFS(
-        context=context,
-        block_size=args.block_size,
-        block_count=block_count,
-        name_max=args.name_max,
-        mount=False,
-    )
+    fs = _mount_from_context(parser, args, context)
 
     shell = LittleFSRepl(fs)
-    try:
-        try:
-            shell.do_mount()
-        except LittleFSError as exc:
-            parser.error(f"Failed to mount '{source}': {exc}")
-        shell.cmdloop()
-    finally:
-        if shell._mounted:
-            with suppress(LittleFSError):
-                fs.unmount()
+
+    shell.cmdloop()
+
+    if shell._mounted:
+        with suppress(LittleFSError):
+            fs.unmount()
 
     return 0
 
