@@ -10,8 +10,13 @@ if typing.TYPE_CHECKING:
 class UserContext:
     """Basic User Context Implementation"""
 
-    def __init__(self, buffsize: int) -> None:
-        self.buffer = bytearray([0xFF] * buffsize)
+    def __init__(self, buffsize: int = None, buffer: bytearray = None) -> None:
+        if buffer is not None:
+            self.buffer = buffer
+        elif buffsize is not None:
+            self.buffer = bytearray([0xFF] * buffsize)
+        else:
+            raise ValueError("Either buffsize or buffer must be provided")
 
     def read(self, cfg: "LFSConfig", block: int, off: int, size: int) -> bytearray:
         """read data
