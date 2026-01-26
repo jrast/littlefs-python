@@ -135,7 +135,7 @@ def _mount_from_context(parser: argparse.ArgumentParser, args: argparse.Namespac
     fs.mount()
     
     if args.verbose:
-        input_image_size = len(fs.context.buffer)
+        input_image_size = context.in_size
         actual_image_size = fs.block_count * args.block_size
         print("LittleFS Configuration:")
         print(f"  Block Size:  {args.block_size:9d}  /  0x{args.block_size:X}")
@@ -215,15 +215,19 @@ def repl(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
         parser.error(f"Source image '{source}' does not exist.")
     context = UserContextFile(str(source)) # In repl we want context to be the file itself, so commands will change it
 
-    fs = _mount_from_context(parser, args, context)
+    try:
+        try:
+            fs = _mount_from_context(parser, args, context)
+        except LittleFSError as exc:
+            parser.error(f"Failed to mount '{source}': {exc}")
 
-    shell = LittleFSRepl(fs)
+        shell = LittleFSRepl(fs)
 
-    shell.cmdloop()
-
-    if shell._mounted:
-        with suppress(LittleFSError):
-            fs.unmount()
+        shell.cmdloop()
+    finally:
+        if shell._mounted:
+            with suppress(LittleFSError):
+                fs.unmount()
 
     return 0
 

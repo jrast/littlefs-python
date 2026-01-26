@@ -17,6 +17,7 @@ class UserContext:
             self.buffer = bytearray([0xFF] * buffsize)
         else:
             raise ValueError("Either buffsize or buffer must be provided")
+        self.in_size = len(self.buffer)
 
     def read(self, cfg: "LFSConfig", block: int, off: int, size: int) -> bytearray:
         """read data
@@ -96,6 +97,7 @@ class UserContextFile(UserContext):
 
         self._path = file_path
         self._fh = open(file_path, mode)
+        self.in_size = os.path.getsize(file_path)
 
     def read(self, cfg: "LFSConfig", block: int, off: int, size: int) -> bytearray:
         logging.getLogger(__name__).debug("LFS Read : Block: %d, Offset: %d, Size=%d" % (block, off, size))
@@ -159,6 +161,7 @@ class UserContextWinDisk(UserContext):
         )
         if self.device == win32file.INVALID_HANDLE_VALUE:
             raise IOError("Could not open disk %s" % disk_path)
+        self.in_size = win32file.GetFileSize(self.device)
 
     def read(self, cfg: "LFSConfig", block: int, off: int, size: int) -> bytearray:
         """read data
