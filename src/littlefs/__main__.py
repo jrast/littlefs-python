@@ -19,7 +19,7 @@ _suffix_map = {
 
 
 def _fs_from_args(args: argparse.Namespace, block_count=None, mount=True, context: UserContext = None) -> LittleFS:
-    block_count=block_count if block_count is not None else getattr(args, "block_count", 0)
+    block_count = block_count if block_count is not None else getattr(args, "block_count", 0)
     return LittleFS(
         context=context,
         block_size=args.block_size,
@@ -131,9 +131,9 @@ def create(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
 
 def _mount_from_context(parser: argparse.ArgumentParser, args: argparse.Namespace, context: UserContext) -> LittleFS:
     # Block count is 0 because we don't know the size of the real image yet, the source file may be compacted (with the create --compact option).
-    fs = _fs_from_args(args, block_count=0, mount=False, context=context) 
+    fs = _fs_from_args(args, block_count=0, mount=False, context=context)
     fs.mount()
-    
+
     if args.verbose:
         input_image_size = context.in_size
         actual_image_size = fs.block_count * args.block_size
@@ -213,7 +213,7 @@ def repl(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
     source: Path = args.source
     if not source.is_file():
         parser.error(f"Source image '{source}' does not exist.")
-    context = UserContextFile(str(source)) # In repl we want context to be the file itself, so commands will change it
+    context = UserContextFile(str(source))  # In repl we want context to be the file itself, so commands will change it
 
     try:
         try:
@@ -358,6 +358,7 @@ def get_parser():
 
     return parser
 
+
 # Getting argv optionally from the caller to enable call from python (generally for testing, but could be used for other purposes)
 def main(argv=None):
     if argv is None:
@@ -370,4 +371,3 @@ def main(argv=None):
 
 if __name__ == "__main__":
     sys.exit(main())
-
