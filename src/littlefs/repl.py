@@ -19,7 +19,7 @@ class LittleFSRepl(cmd.Cmd):
         """Initialize the shell with a LittleFS handle."""
         super().__init__()
         self._fs = fs
-        self._mounted = False
+        self._mounted = True
         self._cwd = "/"
 
     def onecmd(self, line: str) -> bool:
