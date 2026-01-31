@@ -7,12 +7,9 @@ They test the Windows disk/file context for basic LittleFS operations.
 import pytest
 import sys
 
-# Only run these tests on Windows with win32file available
-try:
+# Only run these tests on Windows
+if sys.platform == "win32":
     import win32file
-    HAS_WIN32FILE = True
-except ImportError:
-    HAS_WIN32FILE = False
 
 # Import after checking for win32file
 from littlefs import LittleFS
@@ -20,8 +17,8 @@ from littlefs.context import UserContextWinDisk
 
 
 @pytest.mark.skipif(
-    not HAS_WIN32FILE or sys.platform != "win32",
-    reason="win32file is required and test must run on Windows"
+    sys.platform != "win32",
+    reason="test must run on Windows"
 )
 class TestUserContextWinDisk:
     """Test suite for UserContextWinDisk"""
