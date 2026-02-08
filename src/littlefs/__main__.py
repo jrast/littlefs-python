@@ -108,15 +108,13 @@ def create(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
         if args.verbose:
             print(f"Compacting... {fs.used_block_count} / {args.block_count}")
         compact_fs = _fs_from_args(args, block_count=fs.used_block_count)
-        for root, dirs, files in fs.walk("/"):
-            if not root.endswith("/"):
-                root += "/"
-            for _dir in dirs:
-                compact_fs.makedirs(root + _dir, exist_ok=True)
-            for file in files:
-                path = root + file
-                with fs.open(path, "rb") as src, compact_fs.open(path, "wb") as dest:
-                    dest.write(src.read())
+        for path in sources:
+            rel_path = path.relative_to(root)
+            if path.is_dir():
+                compact_fs.mkdir(rel_path.as_posix())
+            else:
+                with compact_fs.open(rel_path.as_posix(), "wb") as dest:
+                    dest.write(path.read_bytes())
         compact_fs.fs_grow(args.block_count)
         data = compact_fs.context.buffer
         if not args.no_pad:

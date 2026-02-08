@@ -50,3 +50,31 @@ def test_create_and_extract(tmp_path):
     # Verify file contents
     assert (extract_dir / "file1.txt").read_text() == "hello world"
     assert (extract_dir / "subdir" / "file2.txt").read_text() == "test content"
+
+
+def test_create_compact_various_structures(tmp_path):
+    """Test creating compact filesystems with various file configurations."""
+    # (num_files, file_size)
+    configs = [
+        (1, 10), (5, 100), (10, 200), (15, 300), (20, 400), (30, 500),
+        (1, 10000), (5, 5000), (5, 100),
+    ]
+
+    image_file = tmp_path / "test_compact.bin"
+
+    for num_files, file_size in configs:
+        source_dir = tmp_path / f"source_{num_files}_{file_size}"
+        source_dir.mkdir(exist_ok=True)
+
+        for i in range(num_files):
+            (source_dir / f"file_{i}.txt").write_text("x" * file_size)
+
+        create_argv = [
+            "littlefs", "create", str(source_dir), str(image_file),
+            "--block-size", "512", "--fs-size", "64KB",
+            "--compact", "--no-pad",
+        ]
+
+        assert main(create_argv) == 0
+        assert image_file.exists()
+        assert image_file.stat().st_size < 64 * 1024
