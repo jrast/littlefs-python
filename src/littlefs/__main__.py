@@ -85,7 +85,7 @@ def create(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
 
     source = Path(args.source).absolute()
     if source.is_dir():
-        sources = _walk_all(source)
+        sources = list(_walk_all(source))
         root = source
     else:
         sources = [source]
