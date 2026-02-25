@@ -19,14 +19,19 @@ _suffix_map = {
 
 
 def _fs_from_args(args: argparse.Namespace, block_count=None, mount=True, context: UserContext = None) -> LittleFS:
+    """Build LittleFS from CLI args. Options name_max, attr_max, file_max are stored in the
+    superblock and must match when mounting an existing image. inline_max is format-relevant
+    (limiting it may improve flash usage)."""
     block_count = block_count if block_count is not None else getattr(args, "block_count", 0)
-    return LittleFS(
-        context=context,
-        block_size=args.block_size,
-        block_count=block_count,
-        name_max=args.name_max,
-        mount=mount,
-    )
+    kwargs = {
+        "block_size": args.block_size,
+        "block_count": block_count,
+        "name_max": args.name_max,
+        "inline_max": args.inline_max,
+        "attr_max": args.attr_max,
+        "file_max": args.file_max,
+    }
+    return LittleFS(context=context, mount=mount, **kwargs)
 
 
 def size_parser(size_str):
@@ -81,6 +86,12 @@ def create(parser: argparse.ArgumentParser, args: argparse.Namespace) -> int:
         print(f"  Image Size:  {args.fs_size:9d}  /  0x{args.fs_size:X}")
         print(f"  Block Count: {args.block_count:9d}")
         print(f"  Name Max:    {args.name_max:9d}")
+        if args.inline_max:
+            print(f"  Inline Max:  {args.inline_max:9d}  /  0x{args.inline_max:X}")
+        if args.attr_max:
+            print(f"  Attr Max:    {args.attr_max:9d}")
+        if args.file_max:
+            print(f"  File Max:    {args.file_max:9d}")
         print(f"  Image:       {args.destination}")
 
     source = Path(args.source).absolute()
@@ -144,6 +155,12 @@ def _mount_from_context(parser: argparse.ArgumentParser, args: argparse.Namespac
             print(f"  Image Size:  {input_image_size:9d}  /  0x{input_image_size:X}")
         print(f"  Block Count: {fs.block_count:9d}")
         print(f"  Name Max:    {args.name_max:9d}")
+        if args.inline_max:
+            print(f"  Inline Max:  {args.inline_max:9d}  /  0x{args.inline_max:X}")
+        if args.attr_max:
+            print(f"  Attr Max:    {args.attr_max:9d}")
+        if args.file_max:
+            print(f"  File Max:    {args.file_max:9d}")
         print(f"  Image:       {args.source}")
 
     return fs
@@ -251,11 +268,31 @@ def get_parser():
 
     common_parser = argparse.ArgumentParser(add_help=False)
     common_parser.add_argument("-v", "--verbose", action="count", default=0)
+    # Stored in superblock; must match when mounting an existing image:
     common_parser.add_argument(
         "--name-max",
         type=size_parser,
         default=255,
         help="LittleFS max file path length. Defaults to LittleFS's default (255).",
+    )
+    common_parser.add_argument(
+        "--attr-max",
+        type=int,
+        default=0,
+        help="Max custom attribute size per file. Defaults to LittleFS's default (0 = use library default).",
+    )
+    common_parser.add_argument(
+        "--file-max",
+        type=int,
+        default=0,
+        help="Max number of open files. Defaults to LittleFS's default (0 = use library default).",
+    )
+    # Format option: limiting inline_max may improve flash usage.
+    common_parser.add_argument(
+        "--inline-max",
+        type=size_parser,
+        default=0,
+        help="Max inline file size; 0 = use library default. Limiting can improve flash usage.",
     )
 
     subparsers = parser.add_subparsers(required=True, title="Available Commands", dest="command")

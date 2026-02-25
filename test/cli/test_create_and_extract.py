@@ -99,3 +99,48 @@ def test_create_compact_roundtrip(tmp_path, num_files, file_size):
         extracted_file = extract_dir / f"file_{i}.txt"
         assert extracted_file.exists(), f"file_{i}.txt missing from compact image"
         assert extracted_file.read_text() == f"content_{i}_" + "x" * file_size
+
+
+def _make_small_source(tmp_path):
+    """Create a small source tree (one dir, two small files) for config option tests."""
+    source_dir = tmp_path / "source"
+    source_dir.mkdir()
+    (source_dir / "a.txt").write_text("hello")
+    (source_dir / "b.txt").write_text("world")
+    return source_dir
+
+
+@pytest.mark.parametrize(
+    "option_name, create_extra, extract_extra",
+    [
+        ("inline_max", ["--inline-max", "64"], ["--inline-max", "64"]),
+        ("attr_max", ["--attr-max", "64"], ["--attr-max", "64"]),
+        ("file_max", ["--file-max", "32"], ["--file-max", "32"]),
+    ],
+)
+def test_create_extract_roundtrip_with_config_option(tmp_path, option_name, create_extra, extract_extra):
+    """Create image with a config option, extract with same option, compare to source."""
+    source_dir = _make_small_source(tmp_path)
+    image_file = tmp_path / "image.bin"
+    extract_dir = tmp_path / "extracted"
+
+    create_argv = [
+        "littlefs", "create", str(source_dir), str(image_file),
+        "--block-size", "1024", "--fs-size", "64KB",
+    ] + create_extra
+    assert main(create_argv) == 0
+    assert image_file.exists()
+
+    extract_argv = [
+        "littlefs", "extract", str(image_file), str(extract_dir),
+        "--block-size", "1024",
+    ] + extract_extra
+    assert main(extract_argv) == 0
+    assert extract_dir.exists()
+
+    comparison = filecmp.dircmp(source_dir, extract_dir)
+    assert not comparison.diff_files
+    assert not comparison.left_only
+    assert not comparison.right_only
+    assert (extract_dir / "a.txt").read_text() == "hello"
+    assert (extract_dir / "b.txt").read_text() == "world"
