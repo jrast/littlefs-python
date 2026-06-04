@@ -74,6 +74,11 @@ class LittleFS:
             is a free choice. Defaults to :data:`littlefs.lfs.FILENAME_ENCODING`
             (``"utf-8"``). Set this when reading an image whose names were written
             with a different encoding (e.g. ``"latin-1"`` or ``"shift-jis"``).
+
+            Note that littlefs's ``name_max`` limit is measured in *encoded
+            bytes*, not characters. With a multi-byte encoding such as UTF-8, a
+            single non-ASCII character consumes 2-4 bytes, so a name can exceed
+            ``name_max`` (default 255) well before it looks long.
         """
         self.filename_encoding = filename_encoding or lfs.FILENAME_ENCODING
         self.cfg = lfs.LFSConfig(context=context, **kwargs)
