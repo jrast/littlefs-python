@@ -8,8 +8,13 @@ from littlefs.context import UserContext
 from littlefs import errors
 
 
-FILENAME_ENCODING = 'ascii'
-"""Default filename encoding"""
+FILENAME_ENCODING = 'utf-8'
+"""Default filename encoding.
+
+littlefs stores names as opaque byte strings, so any encoding works on the
+C side. UTF-8 is used so that non-ASCII filenames are supported; since ASCII
+is a strict subset of UTF-8, existing ASCII names encode/decode identically.
+"""
 
 class LFSStat(NamedTuple):
     """Littlefs File / Directory status."""
