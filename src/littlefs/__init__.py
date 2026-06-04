@@ -385,12 +385,14 @@ class LittleFS:
     def scandir(self, path=".") -> Iterator["LFSStat"]:
         """List directory content"""
         dh = lfs.dir_open(self.fs, path, self.filename_encoding)
-        info = lfs.dir_read(self.fs, dh, self.filename_encoding)
-        while info:
-            if info.name not in [".", ".."]:
-                yield info
+        try:
             info = lfs.dir_read(self.fs, dh, self.filename_encoding)
-        lfs.dir_close(self.fs, dh)
+            while info:
+                if info.name not in [".", ".."]:
+                    yield info
+                info = lfs.dir_read(self.fs, dh, self.filename_encoding)
+        finally:
+            lfs.dir_close(self.fs, dh)
 
     def stat(self, path: str) -> "LFSStat":
         """Get the status of a file or directory"""

@@ -295,8 +295,9 @@ def get_parser():
         default=0,
         help="Max inline file size; 0 = use library default. Limiting can improve flash usage.",
     )
-    # Host-side encode/decode choice; never stored in the image, so it may differ
-    # freely between create and extract of the same image.
+    # Host-side encode/decode choice; never stored in the image. The same encoding
+    # must be used to extract an image as was used to create it, otherwise filenames
+    # will fail to decode or come out as mojibake.
     common_parser.add_argument(
         "--filename-encoding",
         default=None,

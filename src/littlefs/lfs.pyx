@@ -444,7 +444,7 @@ def file_close(LFSFilesystem fs, LFSFile fh):
 
 
 def file_sync(LFSFilesystem fs, LFSFile fh):
-    _raise_on_error(lfs_file_sync(&fs._impl, &fh._impl))
+    return _raise_on_error(lfs_file_sync(&fs._impl, &fh._impl))
 
 
 def file_read(LFSFilesystem fs, LFSFile fh, size):
