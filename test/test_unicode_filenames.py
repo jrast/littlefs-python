@@ -64,3 +64,38 @@ def test_ascii_names_still_work(fs):
     with fs.open("plain.txt", "rb") as f:
         assert f.read() == b"hello"
     assert fs.stat("plain.txt").name == "plain.txt"
+
+
+def test_per_instance_encoding_roundtrips():
+    """A non-UTF-8 ``filename_encoding`` is honored for both encode and decode."""
+    fs = LittleFS(block_size=128, block_count=64, filename_encoding="latin-1")
+    # "ÿ" is 0xFF in latin-1 but a 2-byte sequence in utf-8.
+    name = "naïveÿ.txt"
+    with fs.open(name, "wb") as f:
+        f.write(b"x")
+    assert fs.stat(name).name == name
+    assert name in fs.listdir("/")
+    fs.rename(name, "renamed_ÿ.txt")
+    assert "renamed_ÿ.txt" in fs.listdir("/")
+
+
+def test_per_instance_encoding_writes_expected_bytes():
+    """The on-disk name bytes reflect the chosen encoding, not the default UTF-8."""
+    fs = LittleFS(block_size=128, block_count=64, filename_encoding="latin-1")
+    with fs.open("ÿ.txt", "wb") as f:
+        f.write(b"x")
+    # Re-mount the same backing store with latin-1: names decode cleanly.
+    same = LittleFS(context=fs.context, filename_encoding="latin-1", block_size=128, block_count=64)
+    assert "ÿ.txt" in same.listdir("/")
+    # The byte written was 0xFF, which is invalid standalone UTF-8, so a UTF-8
+    # instance over the same store fails loudly rather than silently mis-decoding.
+    utf8_view = LittleFS(context=fs.context, block_size=128, block_count=64)
+    with pytest.raises(UnicodeDecodeError):
+        utf8_view.listdir("/")
+
+
+def test_default_encoding_is_utf8():
+    fs = LittleFS(block_size=128, block_count=64)
+    from littlefs import lfs
+
+    assert fs.filename_encoding == lfs.FILENAME_ENCODING == "utf-8"
