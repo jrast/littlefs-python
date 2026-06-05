@@ -8,8 +8,13 @@ from littlefs.context import UserContext
 from littlefs import errors
 
 
-FILENAME_ENCODING = 'ascii'
-"""Default filename encoding"""
+FILENAME_ENCODING = 'utf-8'
+"""Default filename encoding.
+
+littlefs stores names as opaque byte strings, so any encoding works on the
+C side. UTF-8 is used so that non-ASCII filenames are supported; since ASCII
+is a strict subset of UTF-8, existing ASCII names encode/decode identically.
+"""
 
 class LFSStat(NamedTuple):
     """Littlefs File / Directory status."""
@@ -329,50 +334,56 @@ def fs_grow(LFSFilesystem fs, block_count) -> int:
     return _raise_on_error(lfs_fs_grow(&fs._impl, block_count))
 
 
-def remove(LFSFilesystem fs, path):
+def remove(LFSFilesystem fs, path, filename_encoding=None):
     """Remove a file or directory
 
     If removing a directory, the directory must be empty.
     """
-    return _raise_on_error(lfs_remove(&fs._impl, path.encode(FILENAME_ENCODING)))
+    filename_encoding = filename_encoding or FILENAME_ENCODING
+    return _raise_on_error(lfs_remove(&fs._impl, path.encode(filename_encoding)))
 
-def rename(LFSFilesystem fs, oldpath, newpath):
+def rename(LFSFilesystem fs, oldpath, newpath, filename_encoding=None):
     """Rename or move a file or directory
 
     If the destination exists, it must match the source in type.
     If the destination is a directory, the directory must be empty.
     """
-    return _raise_on_error(lfs_rename(&fs._impl, oldpath.encode(FILENAME_ENCODING),
-                                        newpath.encode(FILENAME_ENCODING)))
+    filename_encoding = filename_encoding or FILENAME_ENCODING
+    return _raise_on_error(lfs_rename(&fs._impl, oldpath.encode(filename_encoding),
+                                        newpath.encode(filename_encoding)))
 
 
-def stat(LFSFilesystem fs, path):
+def stat(LFSFilesystem fs, path, filename_encoding=None):
     """Find info about a file or directory"""
+    filename_encoding = filename_encoding or FILENAME_ENCODING
     cdef lfs_info * info = <lfs_info *>malloc(sizeof(lfs_info))
     try:
-        _raise_on_error(lfs_stat(&fs._impl, path.encode(FILENAME_ENCODING), info))
-        return LFSStat(info.type, info.size, info.name.decode(FILENAME_ENCODING))
+        _raise_on_error(lfs_stat(&fs._impl, path.encode(filename_encoding), info))
+        return LFSStat(info.type, info.size, info.name.decode(filename_encoding))
     finally:
         free(info)
 
 
-def getattr(LFSFilesystem fs, path, typ):
+def getattr(LFSFilesystem fs, path, typ, filename_encoding=None):
+    filename_encoding = filename_encoding or FILENAME_ENCODING
     buf = bytearray(LFS_ATTR_MAX)
     cdef unsigned char[::1] buf_view = buf
-    attr_size = _raise_on_error(lfs_getattr(&fs._impl, path.encode(FILENAME_ENCODING), typ, &buf_view[0], LFS_ATTR_MAX))
+    attr_size = _raise_on_error(lfs_getattr(&fs._impl, path.encode(filename_encoding), typ, &buf_view[0], LFS_ATTR_MAX))
     return bytes(buf[:attr_size])
 
 
-def setattr(LFSFilesystem fs, path, typ, data):
+def setattr(LFSFilesystem fs, path, typ, data, filename_encoding=None):
+    filename_encoding = filename_encoding or FILENAME_ENCODING
     cdef const unsigned char[::1] buf_view = data
-    _raise_on_error(lfs_setattr(&fs._impl, path.encode(FILENAME_ENCODING), typ, &buf_view[0], len(data)))
+    _raise_on_error(lfs_setattr(&fs._impl, path.encode(filename_encoding), typ, &buf_view[0], len(data)))
 
 
-def removeattr(LFSFilesystem fs, path, typ):
-    _raise_on_error(lfs_removeattr(&fs._impl, path.encode(FILENAME_ENCODING), typ))
+def removeattr(LFSFilesystem fs, path, typ, filename_encoding=None):
+    filename_encoding = filename_encoding or FILENAME_ENCODING
+    _raise_on_error(lfs_removeattr(&fs._impl, path.encode(filename_encoding), typ))
 
 
-def file_open(LFSFilesystem fs, path, flags):
+def file_open(LFSFilesystem fs, path, flags, filename_encoding=None):
     if isinstance(flags, str):
         creating = False
         reading = False
@@ -418,8 +429,9 @@ def file_open(LFSFilesystem fs, path, flags):
             flags |= LFSFileFlag.rdwr
 
     flags = int(flags)
+    filename_encoding = filename_encoding or FILENAME_ENCODING
     fh = LFSFile()
-    _raise_on_error(lfs_file_open(&fs._impl, &fh._impl, path.encode(FILENAME_ENCODING), flags))
+    _raise_on_error(lfs_file_open(&fs._impl, &fh._impl, path.encode(filename_encoding), flags))
     return fh
 
 
@@ -432,7 +444,7 @@ def file_close(LFSFilesystem fs, LFSFile fh):
 
 
 def file_sync(LFSFilesystem fs, LFSFile fh):
-    _raise_on_error(lfs_file_sync(&fs._impl, &fh._impl))
+    return _raise_on_error(lfs_file_sync(&fs._impl, &fh._impl))
 
 
 def file_read(LFSFilesystem fs, LFSFile fh, size):
@@ -470,24 +482,27 @@ def file_rewind(LFSFilesystem fs, LFSFile fh):
 def file_size(LFSFilesystem fs, LFSFile fh):
     return _raise_on_error(lfs_file_size(&fs._impl, &fh._impl))
 
-def mkdir(LFSFilesystem fs, path):
-    return _raise_on_error(lfs_mkdir(&fs._impl, path.encode(FILENAME_ENCODING)))
+def mkdir(LFSFilesystem fs, path, filename_encoding=None):
+    filename_encoding = filename_encoding or FILENAME_ENCODING
+    return _raise_on_error(lfs_mkdir(&fs._impl, path.encode(filename_encoding)))
 
-def dir_open(LFSFilesystem fs, path):
+def dir_open(LFSFilesystem fs, path, filename_encoding=None):
+    filename_encoding = filename_encoding or FILENAME_ENCODING
     handle = LFSDirectory()
-    _raise_on_error(lfs_dir_open(&fs._impl, &handle._impl, path.encode(FILENAME_ENCODING)))
+    _raise_on_error(lfs_dir_open(&fs._impl, &handle._impl, path.encode(filename_encoding)))
     return handle
 
 def dir_close(LFSFilesystem fs, LFSDirectory dh):
     return _raise_on_error(lfs_dir_close(&fs._impl, &dh._impl))
 
-def dir_read(LFSFilesystem fs, LFSDirectory dh):
+def dir_read(LFSFilesystem fs, LFSDirectory dh, filename_encoding=None):
+    filename_encoding = filename_encoding or FILENAME_ENCODING
     cdef lfs_info * info = <lfs_info *>malloc(sizeof(lfs_info))
     try:
         retval = _raise_on_error(lfs_dir_read(&fs._impl, &dh._impl, info))
         if retval == 0:
             return None
-        return LFSStat(info.type, info.size, info.name.decode(FILENAME_ENCODING))
+        return LFSStat(info.type, info.size, info.name.decode(filename_encoding))
     finally:
         free(info)
 

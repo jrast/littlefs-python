@@ -58,7 +58,29 @@ if TYPE_CHECKING:
 class LittleFS:
     """Littlefs file system"""
 
-    def __init__(self, context: Optional["UserContext"] = None, mount=True, **kwargs) -> None:
+    def __init__(
+        self,
+        context: Optional["UserContext"] = None,
+        mount=True,
+        filename_encoding: Optional[str] = None,
+        **kwargs,
+    ) -> None:
+        """
+        Parameters
+        ----------
+        filename_encoding : Optional[str]
+            Encoding used to encode/decode filenames passed to and returned by
+            the filesystem. littlefs stores names as opaque byte strings, so this
+            is a free choice. Defaults to :data:`littlefs.lfs.FILENAME_ENCODING`
+            (``"utf-8"``). Set this when reading an image whose names were written
+            with a different encoding (e.g. ``"latin-1"`` or ``"shift-jis"``).
+
+            Note that littlefs's ``name_max`` limit is measured in *encoded
+            bytes*, not characters. With a multi-byte encoding such as UTF-8, a
+            single non-ASCII character consumes 2-4 bytes, so a name can exceed
+            ``name_max`` (default 255) well before it looks long.
+        """
+        self.filename_encoding = filename_encoding or lfs.FILENAME_ENCODING
         self.cfg = lfs.LFSConfig(context=context, **kwargs)
         self.fs = lfs.LFSFilesystem()
 
@@ -204,7 +226,7 @@ class LittleFS:
                 buffering = -1
 
         try:
-            fh = lfs.file_open(self.fs, fname, mode)
+            fh = lfs.file_open(self.fs, fname, mode, self.filename_encoding)
         except LittleFSError as e:
             # Try to map to standard Python exceptions
             if e.code == LittleFSError.Error.LFS_ERR_NOENT:
@@ -251,15 +273,15 @@ class LittleFS:
 
     def getattr(self, path: str, typ: Union[str, bytes, int]) -> bytes:
         typ = _typ_to_uint8(typ)
-        return lfs.getattr(self.fs, path, typ)
+        return lfs.getattr(self.fs, path, typ, self.filename_encoding)
 
     def setattr(self, path: str, typ: Union[str, bytes, int], data: bytes) -> None:
         typ = _typ_to_uint8(typ)
-        lfs.setattr(self.fs, path, typ, data)
+        lfs.setattr(self.fs, path, typ, data, self.filename_encoding)
 
     def removeattr(self, path: str, typ: Union[str, bytes, int]) -> None:
         typ = _typ_to_uint8(typ)
-        lfs.removeattr(self.fs, path, typ)
+        lfs.removeattr(self.fs, path, typ, self.filename_encoding)
 
     def listdir(self, path=".") -> List[str]:
         """List directory content
@@ -274,7 +296,7 @@ class LittleFS:
     def mkdir(self, path: str) -> int:
         """Create a new directory"""
         try:
-            return lfs.mkdir(self.fs, path)
+            return lfs.mkdir(self.fs, path, self.filename_encoding)
         except errors.LittleFSError as e:
             if e.code == LittleFSError.Error.LFS_ERR_EXIST:
                 msg = "[LittleFSError {:d}] Cannot create a file when that file already exists: '{:s}'.".format(
@@ -310,7 +332,7 @@ class LittleFS:
             If ``true`` and ``path`` is a directory, recursively remove all children files/folders.
         """
         try:
-            lfs.remove(self.fs, path)
+            lfs.remove(self.fs, path, self.filename_encoding)
             return
         except errors.LittleFSError as e:
             if e.code == LittleFSError.Error.LFS_ERR_NOENT:
@@ -326,7 +348,7 @@ class LittleFS:
         # Recursively delete the ``path`` directory
         for elem in self.scandir(path):
             self.remove(path + "/" + elem.name, recursive=True)
-        lfs.remove(self.fs, path)
+        lfs.remove(self.fs, path, self.filename_encoding)
 
     def removedirs(self, name):
         """Remove directories recursively
@@ -351,7 +373,7 @@ class LittleFS:
 
     def rename(self, src: str, dst: str) -> int:
         """Rename a file or directory"""
-        return lfs.rename(self.fs, src, dst)
+        return lfs.rename(self.fs, src, dst, self.filename_encoding)
 
     def rmdir(self, path: str) -> int:
         """Remove a directory
@@ -362,17 +384,19 @@ class LittleFS:
 
     def scandir(self, path=".") -> Iterator["LFSStat"]:
         """List directory content"""
-        dh = lfs.dir_open(self.fs, path)
-        info = lfs.dir_read(self.fs, dh)
-        while info:
-            if info.name not in [".", ".."]:
-                yield info
-            info = lfs.dir_read(self.fs, dh)
-        lfs.dir_close(self.fs, dh)
+        dh = lfs.dir_open(self.fs, path, self.filename_encoding)
+        try:
+            info = lfs.dir_read(self.fs, dh, self.filename_encoding)
+            while info:
+                if info.name not in [".", ".."]:
+                    yield info
+                info = lfs.dir_read(self.fs, dh, self.filename_encoding)
+        finally:
+            lfs.dir_close(self.fs, dh)
 
     def stat(self, path: str) -> "LFSStat":
         """Get the status of a file or directory"""
-        return lfs.stat(self.fs, path)
+        return lfs.stat(self.fs, path, self.filename_encoding)
 
     def unlink(self, path: str) -> int:
         """Remove a file or directory

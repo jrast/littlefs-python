@@ -6,6 +6,53 @@ import pytest
 from littlefs.__main__ import main
 
 
+def test_filename_encoding_roundtrip(tmp_path, capsys):
+    """Create an image with a non-UTF-8 filename encoding and list it back.
+
+    "ÿ" is 0xFF in latin-1 but a 2-byte sequence in UTF-8, so the chosen
+    encoding must be honored on both the create (encode) and list (decode) side.
+    """
+    source_dir = tmp_path / "source"
+    source_dir.mkdir()
+    name = "naïveÿ.txt"
+    (source_dir / name).write_text("hello")
+
+    image_file = tmp_path / "image.bin"
+    assert (
+        main(
+            [
+                "littlefs", "create", str(source_dir), str(image_file),
+                "--block-size", "512", "--fs-size", "64KB",
+                "--filename-encoding", "latin-1",
+            ]
+        )
+        == 0
+    )
+
+    # Listing with the matching encoding round-trips the name.
+    assert (
+        main(
+            [
+                "littlefs", "list", str(image_file),
+                "--block-size", "512",
+                "--filename-encoding", "latin-1",
+            ]
+        )
+        == 0
+    )
+    assert name in capsys.readouterr().out
+
+    # The on-disk name byte is 0xFF, which is invalid standalone UTF-8, so the
+    # default-encoding (utf-8) list fails loudly rather than silently mis-decoding.
+    with pytest.raises(UnicodeDecodeError):
+        main(
+            [
+                "littlefs", "list", str(image_file),
+                "--block-size", "512",
+            ]
+        )
+
+
 def test_create_and_extract(tmp_path):
     """Test creating a filesystem image and extracting it."""
     # Create test directory with files

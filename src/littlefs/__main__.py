@@ -30,6 +30,7 @@ def _fs_from_args(args: argparse.Namespace, block_count=None, mount=True, contex
         "inline_max": args.inline_max,
         "attr_max": args.attr_max,
         "file_max": args.file_max,
+        "filename_encoding": getattr(args, "filename_encoding", None),
     }
     return LittleFS(context=context, mount=mount, **kwargs)
 
@@ -293,6 +294,15 @@ def get_parser():
         type=size_parser,
         default=0,
         help="Max inline file size; 0 = use library default. Limiting can improve flash usage.",
+    )
+    # Host-side encode/decode choice; never stored in the image. The same encoding
+    # must be used to extract an image as was used to create it, otherwise filenames
+    # will fail to decode or come out as mojibake.
+    common_parser.add_argument(
+        "--filename-encoding",
+        default=None,
+        help="Encoding for filenames stored in the image. Defaults to utf-8. "
+        "Use e.g. latin-1 or shift-jis for images whose names use a different encoding.",
     )
 
     subparsers = parser.add_subparsers(required=True, title="Available Commands", dest="command")
