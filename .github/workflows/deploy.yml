@@ -89,6 +89,32 @@ jobs:
           name: wheels-macos-arm64
           path: ./wheelhouse/*.whl
 
+  build_wheels_windows_arm64:
+    name: Build ARM64 wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-11-arm]
+
+    env:
+      # Native ARM64 CPython builds on Windows are available for 3.11+.
+      CIBW_BUILD: "cp311-* cp312-* cp313-* cp314-*"
+      CIBW_ARCHS_WINDOWS: "ARM64"
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: "recursive"
+          fetch-depth: 0
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v3.4.1
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: wheels-windows-arm64
+          path: ./wheelhouse/*.whl
+
   build_sdist:
     name: Build source distribution
     runs-on: ubuntu-22.04
@@ -109,7 +135,7 @@ jobs:
           path: dist/*.tar.gz
 
   upload_pypi:
-    needs: [build_wheels, build_wheels_macos_arm64, build_sdist]
+    needs: [build_wheels, build_wheels_macos_arm64, build_wheels_windows_arm64, build_sdist]
     runs-on: ubuntu-22.04
     if: ${{ inputs.upload_to_pypi }}
     steps:
