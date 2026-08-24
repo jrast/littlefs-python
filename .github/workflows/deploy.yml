@@ -145,7 +145,7 @@ jobs:
           pattern: wheels-*
           merge-multiple: true
 
-      - uses: pypa/gh-action-pypi-publish@v1.14.0
+      - uses: pypa/gh-action-pypi-publish@v1.14.2
         with:
           user: __token__
           password: ${{ secrets.pypi_api_token }}
