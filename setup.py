@@ -1,7 +1,24 @@
+import os
 from os import path
 from setuptools import setup, find_packages
 from setuptools import Extension
+import Cython
 from Cython.Build import cythonize
+
+# Opt-in stable-ABI (abi3) build: LITTLEFS_PY_LIMITED_API=3.9 builds one extension that runs on CPython 3.9
+# and every later version. Unset, the extension is built for the running Python only.
+LIMITED_API = os.environ.get("LITTLEFS_PY_LIMITED_API")
+LIMITED_API_MACROS = []
+LIMITED_API_OPTIONS = {}
+if LIMITED_API:
+    major, minor = (int(part) for part in LIMITED_API.split("."))
+    if (major, minor) < (3, 9):
+        raise SystemExit("LITTLEFS_PY_LIMITED_API must be 3.9 or later, got %s" % LIMITED_API)
+    cython_version = tuple(int(part) for part in Cython.__version__.split(".")[:2])
+    if cython_version < (3, 1):
+        raise SystemExit("An abi3 build needs Cython 3.1 or later, found %s" % Cython.__version__)
+    LIMITED_API_MACROS = [("Py_LIMITED_API", "0x%02X%02X0000" % (major, minor))]
+    LIMITED_API_OPTIONS = {"bdist_wheel": {"py_limited_api": "cp%d%d" % (major, minor)}}
 
 # Extension definition
 EXTENSIONS = [
@@ -16,8 +33,10 @@ EXTENSIONS = [
             ("LFS_MULTIVERSION", "1"),
             ("LFS_NAME_MAX", "1022"),  # LittleFS limitation: must be <= 1022
             # ('LFS_YES_TRACE', '1')
-        ],
+        ]
+        + LIMITED_API_MACROS,
         extra_compile_args=["-std=c99", "-UNDEBUG"],
+        py_limited_api=bool(LIMITED_API),
     )
 ]
 
@@ -39,6 +58,7 @@ setup(
     package_data={"*": ["py.typed", "*.pyi"]},
     package_dir={"": "src"},
     zip_safe=False,
+    options=LIMITED_API_OPTIONS,
     ext_modules=cythonize(EXTENSIONS, language_level=3, annotate=False, compiler_directives={"embedsignature": True}),
     entry_points={
         "console_scripts": [
