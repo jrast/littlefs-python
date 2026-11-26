@@ -364,18 +364,26 @@ def stat(LFSFilesystem fs, path, filename_encoding=None):
         free(info)
 
 
+# getattr/setattr take plain pointers rather than typed memoryviews: typed memoryviews need Py_buffer,
+# which the limited API (abi3) only has from Python 3.11, and they reject empty or non-contiguous data.
 def getattr(LFSFilesystem fs, path, typ, filename_encoding=None):
     filename_encoding = filename_encoding or FILENAME_ENCODING
     buf = bytearray(LFS_ATTR_MAX)
-    cdef unsigned char[::1] buf_view = buf
-    attr_size = _raise_on_error(lfs_getattr(&fs._impl, path.encode(filename_encoding), typ, &buf_view[0], LFS_ATTR_MAX))
+    cdef unsigned char * p = buf
+    attr_size = _raise_on_error(lfs_getattr(&fs._impl, path.encode(filename_encoding), typ, p, LFS_ATTR_MAX))
     return bytes(buf[:attr_size])
 
 
 def setattr(LFSFilesystem fs, path, typ, data, filename_encoding=None):
     filename_encoding = filename_encoding or FILENAME_ENCODING
-    cdef const unsigned char[::1] buf_view = data
-    _raise_on_error(lfs_setattr(&fs._impl, path.encode(filename_encoding), typ, &buf_view[0], len(data)))
+    if not isinstance(data, bytes):
+        view = memoryview(data)
+        # Single-byte items only, as before: wider items would be stored in the host's byte order.
+        if view.itemsize != 1:
+            raise ValueError("attribute data must have 1-byte items, got itemsize %d" % view.itemsize)
+        data = view.tobytes()
+    cdef const unsigned char * p = data
+    _raise_on_error(lfs_setattr(&fs._impl, path.encode(filename_encoding), typ, p, len(data)))
 
 
 def removeattr(LFSFilesystem fs, path, typ, filename_encoding=None):

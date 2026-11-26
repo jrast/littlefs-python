@@ -169,6 +169,12 @@ the package::
 
 It's highly recommended to install the package in a virtual environment!
 
+To build one wheel against the CPython stable ABI (abi3), which runs on the
+given Python version and every later one, set ``LITTLEFS_PY_LIMITED_API``
+(3.9 or later; needs Cython 3.1 or later)::
+
+    LITTLEFS_PY_LIMITED_API=3.9 python -m build --wheel
+
 Development Hints
 -----------------
 
