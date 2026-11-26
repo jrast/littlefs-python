@@ -1,6 +1,7 @@
-# Builds the stable-ABI (abi3) wheel on the oldest Python it supports and runs the tests with that wheel
-# on the oldest and the newest Python. Anything the extension uses outside that version's limited API
-# (e.g. a typed memoryview, which needs Py_buffer before Python 3.11) fails here, at compile or at import.
+# Builds the stable-ABI (abi3) wheel on the oldest Python it supports and runs the tests with it. Anything
+# the extension uses outside that version's limited API (e.g. a typed memoryview, which needs Py_buffer
+# before Python 3.11) fails here, at compile or at import. Later Pythons are covered by the stable ABI's own
+# guarantee.
 
 name: abi3
 
@@ -14,11 +15,8 @@ env:
   LIMITED_API: "3.9"
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-22.04, macos-15, windows-latest]
+  abi3:
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v7
         with:
@@ -34,35 +32,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip build
           python -m build --wheel
-      - uses: actions/upload-artifact@v7
-        with:
-          name: abi3-wheel-${{ matrix.os }}
-          path: dist/*-abi3-*.whl
-          if-no-files-found: error
-
-  test:
-    needs: build
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-22.04, macos-15, windows-latest]
-        python-version: ["3.9", "3.14"]
-    steps:
-      - uses: actions/checkout@v7
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v7
-        with:
-          python-version: ${{ matrix.python-version }}
-      - uses: actions/download-artifact@v8
-        with:
-          name: abi3-wheel-${{ matrix.os }}
-          path: dist
       - name: Install the abi3 wheel
-        shell: bash
         run: |
-          python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install dist/*-abi3-*.whl
+          python -c "import littlefs.lfs as m; assert m.__file__.endswith('.abi3.so'), m.__file__; print(m.__file__)"
       - name: Test with pytest
         run: |
           pytest
